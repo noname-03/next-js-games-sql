@@ -3,7 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "SQL Quest",
-  description: "Game pembelajaran SQL — belajar PostgreSQL lewat level interaktif.",
+  description:
+    "Game pembelajaran SQL — taklukkan PostgreSQL lewat level interaktif bergaya terminal.",
 };
 
 export default function RootLayout({
@@ -13,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body>{children}</body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

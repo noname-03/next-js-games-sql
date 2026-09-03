@@ -113,89 +113,146 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
 
   const showResult = status.kind === "success" || status.kind === "mismatch";
 
+  const runBtnBase =
+    "rounded-lg border px-4 py-2 font-mono text-sm transition disabled:cursor-not-allowed disabled:opacity-40";
+
   return (
     <div className="flex flex-col gap-3">
-      <textarea
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        spellCheck={false}
-        rows={6}
-        className="w-full resize-y rounded-xl border border-gray-300 bg-gray-950 p-4 font-mono text-sm text-emerald-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      />
+      {/* Editor SQL */}
+      <div className="overflow-hidden rounded-xl border border-edge bg-[#05080f]">
+        <div className="flex items-center justify-between border-b border-edge bg-panel px-3 py-1.5">
+          <span className="font-mono text-[11px] text-faint">
+            query.sql — PostgreSQL
+          </span>
+          <span className="flex gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-danger/60" />
+            <span className="h-2.5 w-2.5 rounded-full bg-xp/60" />
+            <span className="h-2.5 w-2.5 rounded-full bg-succ/60" />
+          </span>
+        </div>
+        <textarea
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          spellCheck={false}
+          rows={6}
+          aria-label="Editor query SQL"
+          className="block w-full resize-y bg-transparent p-4 font-mono text-sm leading-relaxed text-phosphor caret-quest outline-none placeholder:text-faint"
+          placeholder="-- tulis query PostgreSQL-mu di sini"
+        />
+      </div>
 
+      {/* Aksi */}
       <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={runQuery}
           disabled={status.kind === "running" || successRef.current}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className={`${runBtnBase} border-quest/60 bg-quest/15 text-quest hover:bg-quest/25 ${
+            status.kind === "running" ? "" : "animate-pulse-glow"
+          }`}
         >
-          {status.kind === "running" ? "Menjalankan..." : "▶ Jalankan"}
+          {status.kind === "running" ? "▮ menjalankan..." : "▶ jalankan"}
         </button>
         <button
           onClick={reset}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          className={`${runBtnBase} border-edge bg-panel-2 text-fog hover:border-faint hover:text-phosphor`}
         >
-          ↺ Reset
+          ↺ reset
         </button>
         <button
           onClick={() => setShowHint((v) => !v)}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          className={`${runBtnBase} border-edge bg-panel-2 text-fog hover:border-faint hover:text-phosphor`}
         >
-          {showHint ? "Sembunyikan Hint" : "💡 Hint"}
+          {showHint ? "▲ sembunyikan hint" : "▼ hint"}
         </button>
       </div>
 
+      {/* Hint */}
       {showHint && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          {solutionSql}
+        <div className="rounded-xl border border-xp/30 bg-xp/5 p-3 font-mono text-xs text-xp">
+          <span className="mr-2">// hint:</span>
+          <code>{solutionSql}</code>
         </div>
       )}
 
+      {/* Status: error */}
       {status.kind === "error" && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/40 bg-danger/10 p-3 font-mono text-sm text-danger"
+        >
+          <span className="mr-2">✗ error:</span>
           {status.message}
         </div>
       )}
 
+      {/* Status: sukses */}
       {status.kind === "success" && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
-          ✅ Benar! Query-mu cocok dengan solusi.
-          {status.result && (
-            <span className="ml-1 text-emerald-600">({status.result.rowCount} baris, {status.result.timeMs} ms)</span>
-          )}
+        <div className="flex flex-col gap-3">
+          <div
+            role="status"
+            className="animate-pop-in rounded-xl border border-succ/50 bg-succ/10 p-3 font-mono text-sm text-succ"
+          >
+            <span className="mr-2">✓ query benar!</span>
+            {status.result && (
+              <span className="text-fog">
+                ({status.result.rowCount} baris · {status.result.timeMs} ms · percobaan{" "}
+                {status.attempts})
+              </span>
+            )}
+          </div>
+          {/* XP float */}
+          <div className="pointer-events-none relative h-0">
+            <span className="animate-float-up absolute right-4 top-0 font-mono text-lg font-bold text-xp">
+              +10 XP
+            </span>
+          </div>
         </div>
       )}
 
+      {/* Status: mismatch */}
       {status.kind === "mismatch" && (
-        <div className="rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800">
-          ❌ Belum tepat — hasil query-mu belum sama dengan solusi. Coba lagi!
+        <div
+          role="status"
+          className="rounded-xl border border-xp/40 bg-xp/10 p-3 font-mono text-sm text-xp"
+        >
+          <span className="mr-2">≈ belum tepat:</span>
+          hasil query-mu belum sama dengan solusi. coba lagi!
         </div>
       )}
 
+      {/* Tabel hasil */}
       {showResult && resultTable && (
-        <div className="overflow-x-auto rounded-xl border border-gray-200">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-100 text-gray-700">
-              <tr>
-                {resultTable.columns.map((c) => (
-                  <th key={c} className="px-3 py-2 font-semibold">
-                    {c}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {resultTable.rows.map((row, i) => (
-                <tr key={i} className={i % 2 ? "bg-gray-50" : "bg-white"}>
-                  {row.map((cell, j) => (
-                    <td key={j} className="px-3 py-1.5">
-                      {cell}
-                    </td>
+        <div className="overflow-hidden rounded-xl border border-edge">
+          <div className="border-b border-edge bg-panel px-3 py-1.5 font-mono text-[11px] text-faint">
+            hasil ({resultTable.rowCount} baris)
+          </div>
+          <div className="overflow-x-auto bg-[#05080f]">
+            <table className="w-full font-mono text-sm">
+              <thead>
+                <tr className="border-b border-edge bg-panel/60 text-left">
+                  {resultTable.columns.map((c) => (
+                    <th key={c} className="px-3 py-2 font-semibold text-quest">
+                      {c}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {resultTable.rows.map((row, i) => (
+                  <tr
+                    key={i}
+                    className={i % 2 ? "bg-panel/20" : "bg-transparent"}
+                  >
+                    {row.map((cell, j) => (
+                      <td key={j} className="px-3 py-1.5 text-phosphor/90">
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
