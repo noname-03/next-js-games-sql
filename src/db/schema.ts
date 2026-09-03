@@ -34,5 +34,7 @@ export const progress = sqliteTable("progress", {
 });
 
 export type Level = typeof levels.$inferSelect;
+export type NewLevel = typeof levels.$inferInsert;
 export type Exercise = typeof exercises.$inferSelect;
+export type NewExercise = typeof exercises.$inferInsert;
 export type ProgressRow = typeof progress.$inferSelect;

@@ -9,12 +9,13 @@ fs.mkdirSync(dataDir, { recursive: true });
 // Singleton: better-sqlite3 is synchronous & keeps one connection per process.
 const globalForDb = globalThis as unknown as { sqlite?: Database.Database };
 
-const sqlite =
+const raw =
   globalForDb.sqlite ??
   new Database(path.join(dataDir, "learn.db"));
 
 if (process.env.NODE_ENV !== "production") {
-  globalForDb.sqlite = sqlite;
+  globalForDb.sqlite = raw;
 }
 
-export const db = drizzle(sqlite);
+export const sqlite = raw;
+export const db = drizzle(raw);
