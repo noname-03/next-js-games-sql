@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { exercises, levels, progress } from "@/db/schema";
+import LevelMap from "@/components/LevelMap";
+import type { MapNode } from "@/components/LevelMap";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,23 @@ export default async function Home() {
   const totalXp = levelRows.reduce((acc, r) => acc + r.totalXp, 0);
   const allDone = totalCount > 0 && totalDone >= totalCount;
 
+  // Hitung status unlock: level 1 terbuka; level n terbuka bila level n-1 selesai semua
+  const mapNodes: MapNode[] = levelRows.map((row, i) => {
+    const prevDone = i === 0 ? true : levelRows[i - 1].doneCount >= levelRows[i - 1].exerciseCount;
+    const completed = row.doneCount >= row.exerciseCount && row.exerciseCount > 0;
+    const status: MapNode["status"] = completed ? "done" : prevDone ? "open" : "locked";
+    return {
+      id: row.level.id,
+      slug: row.level.slug,
+      orderIndex: row.level.orderIndex,
+      title: row.level.title,
+      description: row.level.description,
+      doneCount: row.doneCount,
+      exerciseCount: row.exerciseCount,
+      status,
+    };
+  });
+
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-8 p-6">
       {/* Header quest */}
@@ -50,12 +68,12 @@ export default async function Home() {
             SQL<span className="text-quest">_</span>QUEST
           </h1>
         </div>
-        <p className="text-sm text-fog">
+        <p className="font-mono text-sm text-fog">
           <span className="text-quest">$</span> selamat datang, petualang.
           Taklukkan 10 level PostgreSQL dan raih XP sebanyak-banyaknya.
         </p>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+        <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-sm">
           <span className="text-fog">
             progres:{" "}
             <span className="font-semibold text-phosphor">
@@ -64,10 +82,11 @@ export default async function Home() {
             soal
           </span>
           <span className="text-fog">
-            total XP: <span className="font-semibold text-xp">⚡ {totalXp}</span>
+            total XP:{" "}
+            <span className="font-semibold text-xp">⚡ {totalXp}</span>
           </span>
           {allDone && (
-            <span className="text-succ">✓ semua level ditaklukkan — kamu hebat!</span>
+            <span className="text-succ">✓ semua level ditaklukkan!</span>
           )}
         </div>
 
@@ -75,58 +94,19 @@ export default async function Home() {
         <div className="h-2 w-full overflow-hidden rounded-full bg-ink">
           <div
             className="h-full rounded-full bg-gradient-to-r from-quest to-phosphor transition-all duration-700"
-            style={{ width: `${totalCount === 0 ? 0 : (totalDone / totalCount) * 100}%` }}
+            style={{
+              width: `${totalCount === 0 ? 0 : (totalDone / totalCount) * 100}%`,
+            }}
           />
         </div>
       </header>
 
-      {/* Daftar level — dipetakan ulang jadi peta di commit berikutnya */}
-      <section className="flex flex-col gap-4">
-        <h2 className="text-xs uppercase tracking-[0.2em] text-faint">
-          // pilih level untuk memulai
+      {/* Peta petualangan */}
+      <section className="flex flex-col items-center gap-4">
+        <h2 className="w-full max-w-xl text-left font-mono text-xs uppercase tracking-[0.2em] text-faint">
+          // peta petualangan
         </h2>
-        {levelRows.map(({ level, exerciseCount, doneCount }) => {
-          const pct = exerciseCount === 0 ? 0 : Math.round((doneCount / exerciseCount) * 100);
-          const completed = doneCount >= exerciseCount && exerciseCount > 0;
-          return (
-            <Link
-              key={level.id}
-              href={`/learn/${level.slug}`}
-              className="group rounded-xl border border-edge bg-ink/60 p-5 transition hover:border-quest/60 hover:bg-panel"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border font-mono text-sm ${
-                      completed
-                        ? "border-succ/50 bg-succ/10 text-succ"
-                        : "border-edge bg-panel-2 text-quest group-hover:border-quest/50"
-                    }`}
-                  >
-                    {completed ? "✓" : level.orderIndex}
-                  </span>
-                  <div>
-                    <h3 className="font-semibold text-phosphor group-hover:text-quest">
-                      {level.title}
-                    </h3>
-                    <p className="mt-0.5 text-xs text-fog">{level.description}</p>
-                  </div>
-                </div>
-                <span className="shrink-0 font-mono text-xs text-faint">
-                  {doneCount}/{exerciseCount}
-                </span>
-              </div>
-              <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-ink">
-                <div
-                  className={`h-full rounded-full transition-all duration-700 ${
-                    completed ? "bg-succ" : "bg-quest"
-                  }`}
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-            </Link>
-          );
-        })}
+        <LevelMap nodes={mapNodes} />
       </section>
 
       <footer className="border-t border-edge pt-4 pb-6 text-center font-mono text-xs text-faint">
