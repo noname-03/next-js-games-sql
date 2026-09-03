@@ -360,7 +360,7 @@ export const levelSeeds: LevelSeed[] = [
         prompt: "Tampilkan major dan IPK rata-rata per jurusan.",
         hint: "SELECT major, AVG(gpa) FROM students GROUP BY major;",
         datasetSql: DATASET_STUDENTS,
-        starterSql: "SELECT major, AVG(gpa) FROM students;",
+        starterSql: "SELECT major, gpa FROM students;",
         solutionSql: "SELECT major, AVG(gpa) FROM students GROUP BY major;",
       },
       {
@@ -368,7 +368,7 @@ export const levelSeeds: LevelSeed[] = [
         prompt: "Tampilkan major dan jumlah mahasiswa per jurusan, urutkan dari jumlah terbanyak.",
         hint: "GROUP BY major, lalu ORDER BY COUNT(*) DESC.",
         datasetSql: DATASET_STUDENTS,
-        starterSql: "SELECT major, COUNT(*) FROM students;",
+        starterSql: "SELECT major FROM students ORDER BY major;",
         solutionSql: "SELECT major, COUNT(*) FROM students GROUP BY major ORDER BY COUNT(*) DESC;",
       },
       {
@@ -448,7 +448,7 @@ export const levelSeeds: LevelSeed[] = [
         prompt: "Tampilkan name mahasiswa dan semester KRS-nya (gabungkan students dengan enrollments).",
         hint: "JOIN enrollments ON students.id = enrollments.student_id.",
         datasetSql: DATASET_FULL,
-        starterSql: "SELECT students.name, enrollments.semester FROM students;",
+        starterSql: "SELECT students.name, students.major FROM students;",
         solutionSql: "SELECT students.name, enrollments.semester FROM students JOIN enrollments ON students.id = enrollments.student_id;",
       },
       {
@@ -456,7 +456,7 @@ export const levelSeeds: LevelSeed[] = [
         prompt: "Tampilkan nama mahasiswa beserta judul mata kuliah yang mereka ambil.",
         hint: "JOIN enrollments ON students.id = enrollments.student_id, lalu JOIN courses ON enrollments.course_id = courses.id.",
         datasetSql: DATASET_FULL,
-        starterSql: "SELECT students.name, courses.title FROM students;",
+        starterSql: "SELECT students.name, students.gpa FROM students;",
         solutionSql: `SELECT students.name, courses.title
 FROM students
 JOIN enrollments ON students.id = enrollments.student_id
@@ -467,7 +467,7 @@ JOIN courses ON enrollments.course_id = courses.id;`,
         prompt: "Tampilkan kode dan judul mata kuliah yang diambil mahasiswa bernama 'Budi Santoso'. Gunakan alias s, e, c untuk tabel.",
         hint: "Alias: FROM students s JOIN enrollments e ON s.id = e.student_id JOIN courses c ON e.course_id = c.id ... WHERE s.name = 'Budi Santoso'.",
         datasetSql: DATASET_FULL,
-        starterSql: "SELECT courses.code, courses.title FROM students;",
+        starterSql: "SELECT s.name, s.major FROM students s;",
         solutionSql: `SELECT c.code, c.title
 FROM students s
 JOIN enrollments e ON s.id = e.student_id
@@ -479,7 +479,7 @@ WHERE s.name = 'Budi Santoso';`,
         prompt: "Tampilkan name mahasiswa dan judul mata kuliah, urutkan berdasarkan nama mahasiswa lalu judul mata kuliah.",
         hint: "Tambahkan ORDER BY students.name, courses.title di akhir query 3-tabel.",
         datasetSql: DATASET_FULL,
-        starterSql: "SELECT students.name, courses.title FROM students;",
+        starterSql: "SELECT students.name FROM students ORDER BY students.name;",
         solutionSql: `SELECT students.name, courses.title
 FROM students
 JOIN enrollments ON students.id = enrollments.student_id
@@ -503,7 +503,7 @@ ORDER BY students.name, courses.title;`,
         prompt: "Tampilkan name semua mahasiswa beserta semester KRS-nya. Mahasiswa tanpa KRS tetap muncul (semester NULL).",
         hint: "LEFT JOIN enrollments ON students.id = enrollments.student_id.",
         datasetSql: DATASET_FULL,
-        starterSql: "SELECT students.name, enrollments.semester FROM students;",
+        starterSql: "SELECT students.name, students.gpa FROM students;",
         solutionSql: `SELECT students.name, enrollments.semester
 FROM students
 LEFT JOIN enrollments ON students.id = enrollments.student_id;`,
