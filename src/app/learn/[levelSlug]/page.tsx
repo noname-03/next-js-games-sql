@@ -83,20 +83,10 @@ export default async function LearnLevelPage({
 
               <div className="mt-4">
                 <SqlRunner
+                  exerciseId={exercise.id}
                   datasetSql={exercise.datasetSql}
                   starterSql={exercise.starterSql}
                   solutionSql={exercise.solutionSql}
-                  onSuccess={async (attempts) => {
-                    await fetch("/api/progress", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        exerciseId: exercise.id,
-                        attempts,
-                        xp: 10,
-                      }),
-                    });
-                  }}
                 />
               </div>
             </section>

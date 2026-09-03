@@ -8,7 +8,7 @@ type SqlRunnerProps = {
   datasetSql: string;
   starterSql: string;
   solutionSql: string;
-  onSuccess?: (attempts: number) => void;
+  exerciseId?: number;
 };
 
 type Status =
@@ -18,7 +18,7 @@ type Status =
   | { kind: "mismatch"; userResult: RunResult; solutionResult: RunResult; attempts: number }
   | { kind: "error"; message: string };
 
-export default function SqlRunner({ datasetSql, starterSql, solutionSql, onSuccess }: SqlRunnerProps) {
+export default function SqlRunner({ datasetSql, starterSql, solutionSql, exerciseId }: SqlRunnerProps) {
   const [code, setCode] = useState(starterSql);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [resultTable, setResultTable] = useState<RunResult | null>(null);
@@ -39,6 +39,22 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, onSucce
       void runnerRef.current?.close();
     };
   }, []);
+
+  const recordProgress = useCallback(
+    async (attempts: number) => {
+      if (!exerciseId) return;
+      try {
+        await fetch("/api/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ exerciseId, attempts, xp: 10 }),
+        });
+      } catch {
+        // Simpan progress gagal — jangan blokir pengalaman belajar
+      }
+    },
+    [exerciseId]
+  );
 
   const runQuery = async () => {
     if (successRef.current) return;
@@ -74,7 +90,7 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, onSucce
         successRef.current = true;
         setResultTable(userOutcome.result);
         setStatus({ kind: "success", result: userOutcome.result, attempts: attemptsRef.current });
-        onSuccess?.(attemptsRef.current);
+        void recordProgress(attemptsRef.current);
       } else {
         setResultTable(userOutcome.result);
         setStatus({ kind: "mismatch", userResult: userOutcome.result ?? { columns: [], rows: [], rowCount: 0, timeMs: 0 }, solutionResult: solutionOutcome.result, attempts: attemptsRef.current });
