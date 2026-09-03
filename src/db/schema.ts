@@ -6,6 +6,7 @@ export const levels = sqliteTable("levels", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   orderIndex: integer("order_index").notNull(),
+  schemaJson: text("schema_json"),
 });
 
 export const exercises = sqliteTable("exercises", {
