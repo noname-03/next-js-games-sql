@@ -4,6 +4,7 @@ import { db } from "@/db/client";
 import { exercises, levels, progress } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import SqlRunner from "@/components/SqlRunner";
+import SchemaExplorer from "@/components/SchemaExplorer";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,8 @@ export default async function LearnLevelPage({
         <h1 className="text-2xl font-bold">{level.title}</h1>
         <p className="mt-1 text-gray-600">{level.description}</p>
       </header>
+
+      <SchemaExplorer schemaJson={level.schemaJson} />
 
       <div className="flex flex-col gap-8">
         {levelExercises.map((exercise, index) => {

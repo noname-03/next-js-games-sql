@@ -1,0 +1,1 @@
+ALTER TABLE `levels` ADD `schema_json` text;
