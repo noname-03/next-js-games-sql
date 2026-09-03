@@ -18,11 +18,23 @@ type Status =
   | { kind: "mismatch"; userResult: RunResult; solutionResult: RunResult; attempts: number }
   | { kind: "error"; message: string };
 
+// Partikel perayaan: warna tema + delay/posisi/rotasi pseudo-acak stabil
+const CONFETTI_COLORS = ["#fbbf24", "#22d3ee", "#34d399", "#a78bfa", "#fb7185"];
+const CONFETTI_COUNT = 26;
+const confettiPieces = Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
+  left: (i * 37) % 100,
+  delay: (i % 10) * 0.05,
+  color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+  rotate: (i * 47) % 360,
+  size: 4 + (i % 3) * 2,
+}));
+
 export default function SqlRunner({ datasetSql, starterSql, solutionSql, exerciseId }: SqlRunnerProps) {
   const [code, setCode] = useState(starterSql);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [resultTable, setResultTable] = useState<RunResult | null>(null);
   const [showHint, setShowHint] = useState(false);
+  const [confettiBurst, setConfettiBurst] = useState(0);
   const attemptsRef = useRef(0);
   const successRef = useRef(false);
   const runnerRef = useRef<Awaited<ReturnType<typeof createRunner>> | null>(null);
@@ -90,6 +102,7 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
         successRef.current = true;
         setResultTable(userOutcome.result);
         setStatus({ kind: "success", result: userOutcome.result, attempts: attemptsRef.current });
+        setConfettiBurst((n) => n + 1);
         void recordProgress(attemptsRef.current);
       } else {
         setResultTable(userOutcome.result);
@@ -190,8 +203,27 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
         <div className="flex flex-col gap-3">
           <div
             role="status"
-            className="animate-pop-in rounded-xl border border-succ/50 bg-succ/10 p-3 font-mono text-sm text-succ"
+            className="animate-pop-in relative overflow-visible rounded-xl border border-succ/50 bg-succ/10 p-3 font-mono text-sm text-succ"
           >
+            {/* Konfeti */}
+            {confettiBurst > 0 && (
+              <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-2 h-40">
+                {confettiPieces.map((p, i) => (
+                  <span
+                    key={`${confettiBurst}-${i}`}
+                    className="animate-confetti absolute top-0 block rounded-[1px]"
+                    style={{
+                      left: `${p.left}%`,
+                      width: p.size,
+                      height: p.size * 0.6,
+                      backgroundColor: p.color,
+                      transform: `rotate(${p.rotate}deg)`,
+                      animationDelay: `${p.delay}s`,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
             <span className="mr-2">✓ query benar!</span>
             {status.result && (
               <span className="text-fog">
