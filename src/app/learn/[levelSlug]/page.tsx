@@ -5,6 +5,7 @@ import { exercises, levels, progress } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import SqlRunner from "@/components/SqlRunner";
 import SchemaExplorer from "@/components/SchemaExplorer";
+import LevelSnakeMap from "@/components/LevelSnakeMap";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +79,31 @@ export default async function LearnLevelPage({
         <p className="mt-1 font-mono text-sm text-fog">
           <span className="text-quest">$</span> {level.description}
         </p>
+
+        {allDone && (
+          <Link
+            href="/"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-xp/50 bg-xp/10 px-4 py-2 font-mono text-sm text-xp transition hover:bg-xp/20"
+          >
+            🧙 lihat hero-mu melaju di peta →
+          </Link>
+        )}
       </header>
+
+      {/* Peta misi ular: posisi hero di antara soal-soal level ini */}
+      <section className="rounded-xl border border-edge bg-ink/40 p-4">
+        <h2 className="mb-2 text-center font-mono text-xs uppercase tracking-[0.2em] text-faint">
+          // peta misi level ini
+        </h2>
+        <LevelSnakeMap
+          exercises={levelExercises.map((e) => ({
+            id: e.id,
+            orderIndex: e.orderIndex,
+            title: e.title,
+          }))}
+          completedIds={[...completedIds]}
+        />
+      </section>
 
       {/* Panel skema database */}
       <SchemaExplorer schemaJson={level.schemaJson} />

@@ -104,6 +104,12 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
         setStatus({ kind: "success", result: userOutcome.result, attempts: attemptsRef.current });
         setConfettiBurst((n) => n + 1);
         void recordProgress(attemptsRef.current);
+        if (exerciseId) {
+          // Beri tahu peta (LevelSnakeMap) bahwa soal ini baru saja ditaklukkan
+          window.dispatchEvent(
+            new CustomEvent("sqlquest:exercise-done", { detail: { exerciseId } })
+          );
+        }
       } else {
         setResultTable(userOutcome.result);
         setStatus({ kind: "mismatch", userResult: userOutcome.result ?? { columns: [], rows: [], rowCount: 0, timeMs: 0 }, solutionResult: solutionOutcome.result, attempts: attemptsRef.current });
