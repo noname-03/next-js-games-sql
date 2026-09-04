@@ -4,6 +4,7 @@ import { db } from "@/db/client";
 import { exercises, levels, progress } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import ChapterBrowser from "@/components/ChapterBrowser";
+import Leaderboard from "@/components/Leaderboard";
 import type { ChapterMeta } from "@/components/ChapterBrowser";
 import type { MapNode } from "@/components/LevelMap";
 
@@ -227,6 +228,11 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         nodes={activeNodes}
         activeDone={activeDone}
       />
+
+      {/* Papan juara akumulasi — hanya di mode daftar bab */}
+      {activeChapter === null && (
+        <Leaderboard />
+      )}
 
       {activeChapter !== null && !babTerbuka && (
         <p className="-mt-3 text-center text-sm font-bold text-ink-faint">

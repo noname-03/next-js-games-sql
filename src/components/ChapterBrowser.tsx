@@ -10,6 +10,7 @@ import {
   Trophy,
 } from "lucide-react";
 import LevelMap from "./LevelMap";
+import Leaderboard from "./Leaderboard";
 import type { MapNode } from "./LevelMap";
 
 export type ChapterMeta = {
@@ -74,6 +75,11 @@ export default function ChapterBrowser({
         </p>
 
         <LevelMap nodes={nodes} />
+
+        {/* Papan juara bab ini */}
+        <div className="mt-2 w-full max-w-md">
+          <Leaderboard bab={activeChapter} />
+        </div>
 
         {activeDone && activeChapter < totalChapters && (
           <button
