@@ -84,12 +84,27 @@ export async function createRunner(datasetSql: string): Promise<{
 /**
  * Bandingkan hasil query siswa dengan hasil solusi.
  * Kolom boleh beda urutan; baris diperlakukan sebagai multiset.
+ * Bila ordered=true, baris dibandingkan berurutan (untuk soal ORDER BY).
  */
-export function compareResults(user: RunResult | null, solution: RunResult): boolean {
+export function compareResults(
+  user: RunResult | null,
+  solution: RunResult,
+  ordered: boolean = false
+): boolean {
   if (!user) return false;
   if (user.rows.length !== solution.rows.length) return false;
   if (user.columns.length !== solution.columns.length) return false;
 
+  if (ordered) {
+    // Perbandingan strict: baris harus sama persis termasuk urutan
+    const normRow = (r: string[]): string => [...r].join("|");
+    for (let i = 0; i < user.rows.length; i++) {
+      if (normRow(user.rows[i]) !== normRow(solution.rows[i])) return false;
+    }
+    return true;
+  }
+
+  // Perbandingan multiset: abaikan urutan baris (default untuk SELECT biasa)
   const norm = (r: string[]): string => [...r].sort().join("|");
   const userSet = new Set(user.rows.map(norm));
   const solSet = new Set(solution.rows.map(norm));

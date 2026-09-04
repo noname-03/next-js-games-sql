@@ -144,7 +144,8 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
       }
 
       const userResult = userOutcome.result;
-      const ok = compareResults(userResult, solutionOutcome.result);
+      const orderSensitive = /order\s+by/i.test(solutionSql);
+      const ok = compareResults(userResult, solutionOutcome.result, orderSensitive);
       if (ok) {
         successRef.current = true;
         // Hentikan timer & hitung durasi (ms) + penalti
