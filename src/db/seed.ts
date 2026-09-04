@@ -1,6 +1,6 @@
 import { sqlite } from "./client";
 import { DATASET_FULL, DATASET_STUDENTS, levelSeeds } from "./content";
-import { DATASET_SCHOOL, extraLevelsA, extraLevelsB, extraLevelsC } from "./content-extra";
+import { DATASET_SCHOOL, extraLevelsA, extraLevelsB, extraLevelsC, extraLevelsD } from "./content-extra";
 import { introspectDataset } from "../lib/introspect-dataset";
 import type { DatasetSchema } from "../lib/introspect-dataset";
 
@@ -37,7 +37,7 @@ async function main() {
   await getSchema(DATASET_SCHOOL);
 
   // Gabungkan semua sumber level
-  const allSeeds = [...levelSeeds, ...extraLevelsA, ...extraLevelsB, ...extraLevelsC];
+  const allSeeds = [...levelSeeds, ...extraLevelsA, ...extraLevelsB, ...extraLevelsC, ...extraLevelsD];
 
   const insertLevel = sqlite.prepare(
     "INSERT INTO levels (slug, title, description, order_index, schema_json, concept, explanation) VALUES (?, ?, ?, ?, ?, ?, ?)"

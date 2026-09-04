@@ -704,3 +704,186 @@ export const extraLevelsC: LevelSeed2[] = [
     ],
   },
 ];
+
+// ============================================================
+// BAB D — SUBQUERY LANJUTAN (level 27-32)
+// ============================================================
+export const extraLevelsD: LevelSeed2[] = [
+  {
+    level: {
+      slug: "subquery-from",
+      title: "Level 27 — Subquery di FROM",
+      description: "Gunakan hasil query sebagai 'tabel sementara' di FROM.",
+      orderIndex: 27,
+      concept: "Subquery di FROM",
+      explanation:
+        "Hasil SELECT bisa dipakai seperti tabel di dalam FROM, lalu diberi alias:\n\nSELECT * FROM (SELECT name, gpa FROM students) AS daftar;\n\nKita bisa langsung query hasilnya lagi — misal hitung rata-rata dari hasil.\n\nCoba: SELECT AVG(gpa) FROM (SELECT gpa FROM students WHERE class_name='7A') AS k7a;",
+    },
+    exercises: [
+      {
+        title: "Tabel Sementara",
+        prompt: "Ambil name & gpa siswa kelas 7A lewat subquery di FROM (alias k7a), lalu tampilkan semua.",
+        hint: "SELECT * FROM (SELECT name, gpa FROM students WHERE class_name='7A') AS k7a;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gpa FROM students;",
+        solutionSql:
+          "SELECT * FROM (SELECT name, gpa FROM students WHERE class_name = '7A') AS k7a;",
+      },
+      {
+        title: "Rata-rata dari Subquery",
+        prompt: "Hitung rata-rata gpa dari subquery berisi gpa siswa kelas 7.",
+        hint: "SELECT AVG(gpa) FROM (SELECT gpa FROM students WHERE class_name LIKE '7%') AS k7;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT AVG(gpa) FROM students;",
+        solutionSql:
+          "SELECT AVG(gpa) FROM (SELECT gpa FROM students WHERE class_name LIKE '7%') AS k7;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "subquery-exists",
+      title: "Level 28 — EXISTS",
+      description: "Cek 'apakah ada baris yang memenuhi kondisi' dengan EXISTS.",
+      orderIndex: 28,
+      concept: "EXISTS",
+      explanation:
+        "EXISTS(kueri) bernilai TRUE kalau kueri menghasilkan minimal 1 baris.\nBiasanya dipakai dengan subquery berkorelasi (subquery yang melihat baris luar).\n\nContoh — siswa yang pernah ujian:\nSELECT name FROM students s\nWHERE EXISTS (\n  SELECT 1 FROM exam_scores e WHERE e.student_id = s.id\n);\n\n'SELECT 1' cuma isi — yang penting barisnya ada.",
+    },
+    exercises: [
+      {
+        title: "Siswa yang Pernah Ujian",
+        prompt: "Tampilkan name siswa yang pernah punya nilai ujian (ada di exam_scores) pakai EXISTS.",
+        hint: "WHERE EXISTS (SELECT 1 FROM exam_scores e WHERE e.student_id = s.id)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name FROM students s;",
+        solutionSql:
+          "SELECT name FROM students s WHERE EXISTS (SELECT 1 FROM exam_scores e WHERE e.student_id = s.id);",
+      },
+      {
+        title: "Siswa Tanpa Ujian",
+        prompt: "Tampilkan name siswa yang BELUM pernah ujian (pakai NOT EXISTS).",
+        hint: "WHERE NOT EXISTS (SELECT 1 FROM exam_scores e WHERE e.student_id = s.id)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name FROM students s;",
+        solutionSql:
+          "SELECT name FROM students s WHERE NOT EXISTS (SELECT 1 FROM exam_scores e WHERE e.student_id = s.id);",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "subquery-correlated",
+      title: "Level 29 — Subquery Berkorelasi",
+      description: "Subquery yang membandingkan tiap baris luar (per baris).",
+      orderIndex: 29,
+      concept: "Subquery Berkorelasi",
+      explanation:
+        "Subquery berkorelasi dijalankan ULANG untuk tiap baris tabel luar — subquery memakai kolom dari baris luar.\n\nContoh: siswa yang gpa-nya di atas rata-rata kelasnya sendiri:\nSELECT name, gpa FROM students s\nWHERE gpa > (SELECT AVG(gpa) FROM students s2 WHERE s2.class_name = s.class_name);\n\nUntuk tiap siswa, subquery menghitung rata-rata kelas siswa itu.",
+    },
+    exercises: [
+      {
+        title: "Di Atas Rata-rata Kelas",
+        prompt: "Tampilkan name siswa yang gpa-nya di atas rata-rata kelasnya sendiri.",
+        hint: "WHERE gpa > (SELECT AVG(gpa) FROM students s2 WHERE s2.class_name = s.class_name)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gpa, class_name FROM students s;",
+        solutionSql:
+          "SELECT name FROM students s WHERE gpa > (SELECT AVG(gpa) FROM students s2 WHERE s2.class_name = s.class_name);",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "boss-subquery",
+      title: "Level 30 — BOSS: Subquery",
+      description: "Tantangan subquery: FROM, EXISTS, correlated.",
+      orderIndex: 30,
+      concept: "Ulasan Subquery",
+      explanation:
+        "Review subquery:\n• Di WHERE: gpa > (SELECT AVG(gpa) ...)\n• Di FROM: FROM (SELECT ...) AS alias\n• EXISTS / NOT EXISTS cek keberadaan\n• Berkorelasi: subquery lihat baris luar\n\nSemangat, ini boss terakhir bab subquery!",
+    },
+    exercises: [
+      {
+        title: "Nilai di Atas Rata-rata (Boss)",
+        prompt: "Tampilkan student_id dan score dari exam_scores yang score-nya di atas rata-rata semua score.",
+        hint: "WHERE score > (SELECT AVG(score) FROM exam_scores)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT student_id, score FROM exam_scores;",
+        solutionSql:
+          "SELECT student_id, score FROM exam_scores WHERE score > (SELECT AVG(score) FROM exam_scores);",
+      },
+      {
+        title: "Siswa Nilai 90+ (Boss)",
+        prompt: "Tampilkan name siswa yang pernah mendapat score >= 90 (pakai subquery IN atau EXISTS).",
+        hint: "WHERE EXISTS (SELECT 1 FROM exam_scores e WHERE e.student_id = s.id AND e.score >= 90)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name FROM students s;",
+        solutionSql:
+          "SELECT name FROM students s WHERE EXISTS (SELECT 1 FROM exam_scores e WHERE e.student_id = s.id AND e.score >= 90);",
+      },
+      {
+        title: "Terbaik per Mapel (Boss)",
+        prompt: "Tampilkan subject_id dan score tertinggi tiap mata pelajaran (pakai GROUP BY + MAX).",
+        hint: "SELECT subject_id, MAX(score) FROM exam_scores GROUP BY subject_id;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT subject_id, score FROM exam_scores;",
+        solutionSql:
+          "SELECT subject_id, MAX(score) FROM exam_scores GROUP BY subject_id;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "union-intersect",
+      title: "Level 31 — UNION & INTERSECT",
+      description: "Gabungkan hasil dua query: UNION (gabung) & INTERSECT (irisan).",
+      orderIndex: 31,
+      concept: "UNION & INTERSECT",
+      explanation:
+        "UNION menggabungkan hasil dua query (duplikat dibuang).\nINTERSECT mengambil baris yang ada di KEDUA query.\nSyarat: jumlah & tipe kolom harus sama.\n\nContoh:\nSELECT class_name FROM students WHERE gpa >= 3.5\nUNION\nSELECT class_name FROM students WHERE gender = 'L';\n\nCoba: SELECT name FROM students WHERE class_name='7A' INTERSECT SELECT name FROM students WHERE gpa >= 3.5;",
+    },
+    exercises: [
+      {
+        title: "Gabung Dua Kelas",
+        prompt: "Tampilkan gabungan class_name siswa 7A dan siswa 7B (UNION, tanpa duplikat).",
+        hint: "SELECT class_name FROM students WHERE class_name='7A' UNION SELECT class_name FROM students WHERE class_name='7B';",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT class_name FROM students;",
+        solutionSql:
+          "SELECT class_name FROM students WHERE class_name = '7A' UNION SELECT class_name FROM students WHERE class_name = '7B';",
+      },
+      {
+        title: "Irisan Pintar & Kelas 7",
+        prompt: "Nama siswa yang ada di kelas 7A DAN gpa-nya >= 3.5 — pakai INTERSECT.",
+        hint: "SELECT name FROM students WHERE class_name='7A' INTERSECT SELECT name FROM students WHERE gpa >= 3.5;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name FROM students;",
+        solutionSql:
+          "SELECT name FROM students WHERE class_name = '7A' INTERSECT SELECT name FROM students WHERE gpa >= 3.5;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "except-boss",
+      title: "Level 32 — EXCEPT & BOSS Set",
+      description: "EXCEPT (selisih) + tantangan gabungan set operasi.",
+      orderIndex: 32,
+      concept: "EXCEPT",
+      explanation:
+        "EXCEPT mengambil baris dari query pertama yang TIDAK ada di query kedua.\n\nContoh: siswa kelas 7A yang TIDAK termasuk gpa>=3.5:\nSELECT name FROM students WHERE class_name='7A'\nEXCEPT\nSELECT name FROM students WHERE gpa >= 3.5;\n\nUNION = gabung, INTERSECT = irisan, EXCEPT = selisih.",
+    },
+    exercises: [
+      {
+        title: "Kelas 7A yang Tidak Pintar",
+        prompt: "Nama siswa kelas 7A yang TIDAK termasuk siswa gpa >= 3.5 (EXCEPT).",
+        hint: "SELECT name FROM students WHERE class_name='7A' EXCEPT SELECT name FROM students WHERE gpa >= 3.5;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name FROM students WHERE class_name = '7A';",
+        solutionSql:
+          "SELECT name FROM students WHERE class_name = '7A' EXCEPT SELECT name FROM students WHERE gpa >= 3.5;",
+      },
+    ],
+  },
+];
