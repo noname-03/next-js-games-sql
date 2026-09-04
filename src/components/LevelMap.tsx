@@ -79,12 +79,16 @@ export default function LevelMap({ nodes }: LevelMapProps) {
       const container = containerRef.current;
       if (!container) return [];
       const cRect = container.getBoundingClientRect();
+      // Hero berjalan di kolom jalur khusus (paling kiri, selebar 48px).
+      // x konstan = pusat kolom jalur (24px). y mengikuti tinggi node (sama
+      // dengan tinggi baris karena items-center).
+      const LANE_CENTER_X = 24;
       const pts: Pt[] = [];
       for (const dot of dotRefs.current) {
         if (!dot) continue;
         const r = dot.getBoundingClientRect();
         pts.push({
-          x: r.left + r.width / 2 - cRect.left,
+          x: LANE_CENTER_X,
           y: r.top + r.height / 2 - cRect.top,
         });
       }
@@ -92,7 +96,7 @@ export default function LevelMap({ nodes }: LevelMapProps) {
       if (fin) {
         const r = fin.getBoundingClientRect();
         pts.push({
-          x: r.left + r.width / 2 - cRect.left,
+          x: LANE_CENTER_X,
           y: r.top + r.height / 2 - cRect.top,
         });
       }
@@ -164,13 +168,13 @@ export default function LevelMap({ nodes }: LevelMapProps) {
       ref={containerRef}
       className="relative mx-auto w-full max-w-xl"
     >
-      {/* Rel kiri: garis jalur di belakang node */}
+      {/* Rel kiri: garis jalur di kolom kosong khusus (pusat x=24) */}
       {rail && (
         <div
           aria-hidden
           className="absolute w-1.5 rounded-full bg-gradient-to-b from-grape/60 via-pink/50 to-peach/60"
           style={{
-            left: 24 - 3, // pusat kolom node (24px) dikurangi separuh tebal garis
+            left: 24 - 3, // pusat kolom jalur (24px) dikurangi separuh tebal garis
             top: rail.top,
             height: rail.height,
           }}
@@ -237,10 +241,13 @@ export default function LevelMap({ nodes }: LevelMapProps) {
         return (
           <div
             key={node.id}
-            className="animate-pop-in relative z-10 mb-5 flex w-full items-center gap-3"
+            className="animate-pop-in relative z-10 mb-5 flex w-full items-center gap-3 pl-12"
             style={{ animationDelay: `${i * 80}ms` }}
           >
-            {/* Node bulat bernomor — sejajar di kolom kiri */}
+            {/* Kolom jalur kosong (48px) — tempat hero berjalan, tanpa konten */}
+            <div className="pointer-events-none absolute left-0 top-1/2 h-0 w-12 -translate-y-1/2" />
+
+            {/* Node bulat bernomor */}
             <div
               ref={(el) => {
                 dotRefs.current[i] = el;
@@ -298,12 +305,14 @@ export default function LevelMap({ nodes }: LevelMapProps) {
         );
       })}
 
-      {/* Garis akhir — juga di rel kiri */}
+      {/* Garis akhir — node finish di kolom yang sama (setelah padding 48px) */}
       <div
         key="finish"
-        className="animate-pop-in relative z-10 mb-2 flex w-full items-center gap-3"
+        className="animate-pop-in relative z-10 mb-2 flex w-full items-center gap-3 pl-12"
         style={{ animationDelay: `${nodes.length * 80}ms` }}
       >
+        <div className="pointer-events-none absolute left-0 top-1/2 h-0 w-12 -translate-y-1/2" />
+
         <div
           ref={finishDotRef}
           className={`z-20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px] bg-white transition ${
