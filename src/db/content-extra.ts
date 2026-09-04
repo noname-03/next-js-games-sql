@@ -497,3 +497,210 @@ export const extraLevelsB: LevelSeed2[] = [
     ],
   },
 ];
+
+// ============================================================
+// BAB C — CASE & LOGIKA KONDISI (level 21-30)
+// ============================================================
+export const extraLevelsC: LevelSeed2[] = [
+  {
+    level: {
+      slug: "case-dasar",
+      title: "Level 21 — CASE (Logika Jika-Maka)",
+      description: "Buat kolom baru berisi teks berdasarkan kondisi dengan CASE.",
+      orderIndex: 21,
+      concept: "CASE",
+      explanation:
+        "CASE seperti 'jika-maka' di SQL. Bentuknya:\n\nCASE\n  WHEN kondisi THEN hasil1\n  WHEN kondisi2 THEN hasil2\n  ELSE hasil_akhir\nEND\n\nContoh:\nCASE\n  WHEN gpa >= 3.5 THEN 'Sangat Bagus'\n  WHEN gpa >= 3.0 THEN 'Bagus'\n  ELSE 'Perlu Belajar'\nEND\n\nCoba: SELECT name, gpa,\n  CASE WHEN gpa >= 3.5 THEN 'Istimewa' ELSE 'Biasa' END\nFROM students;",
+    },
+    exercises: [
+      {
+        title: "Label IPK Sederhana",
+        prompt: "Tampilkan name, gpa, dan kolom label: 'Tinggi' bila gpa >= 3.5, selain itu 'Rendah'.",
+        hint: "CASE WHEN gpa >= 3.5 THEN 'Tinggi' ELSE 'Rendah' END",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gpa FROM students;",
+        solutionSql:
+          "SELECT name, gpa, CASE WHEN gpa >= 3.5 THEN 'Tinggi' ELSE 'Rendah' END FROM students;",
+      },
+      {
+        title: "Predikat 3 Tingkat",
+        prompt: "Tampilkan name dan predikat: >=3.5 'A', >=3.0 'B', lainnya 'C'.",
+        hint: "CASE WHEN gpa >= 3.5 THEN 'A' WHEN gpa >= 3.0 THEN 'B' ELSE 'C' END",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gpa FROM students;",
+        solutionSql:
+          "SELECT name, CASE WHEN gpa >= 3.5 THEN 'A' WHEN gpa >= 3.0 THEN 'B' ELSE 'C' END FROM students;",
+      },
+      {
+        title: "CASE + Alias",
+        prompt: "Tampilkan name dan hasil CASE di atas dengan alias 'predikat'.",
+        hint: "Tambahkan AS predikat setelah END.",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gpa FROM students;",
+        solutionSql:
+          "SELECT name, CASE WHEN gpa >= 3.5 THEN 'A' WHEN gpa >= 3.0 THEN 'B' ELSE 'C' END AS predikat FROM students;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "case-gender",
+      title: "Level 22 — CASE untuk Teks Lain",
+      description: "Ubah kode singkat (L/P) jadi teks panjang dengan CASE.",
+      orderIndex: 22,
+      concept: "CASE untuk Kode",
+      explanation:
+        "Sering data menyimpan kode singkat (L/P, Y/N). CASE dipakai mengubahnya jadi teks yang enak dibaca.\n\nCASE gender\n  WHEN 'L' THEN 'Laki-laki'\n  WHEN 'P' THEN 'Perempuan'\nEND\n\nBentuk WHEN kolom = nilai boleh disingkat jadi WHEN kolom …? Tidak — penulisan CASE kolom WHEN nilai hanya untuk perbandingan '='.\n\nCoba: SELECT name, CASE gender WHEN 'L' THEN 'Laki-laki' ELSE 'Perempuan' END FROM students;",
+    },
+    exercises: [
+      {
+        title: "Ubah Kode Gender",
+        prompt: "Tampilkan name dan gender jadi 'Laki-laki'/'Perempuan' (gunakan CASE gender WHEN ...).",
+        hint: "CASE gender WHEN 'L' THEN 'Laki-laki' WHEN 'P' THEN 'Perempuan' END",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gender FROM students;",
+        solutionSql:
+          "SELECT name, CASE gender WHEN 'L' THEN 'Laki-laki' WHEN 'P' THEN 'Perempuan' END FROM students;",
+      },
+      {
+        title: "Filter Hasil CASE",
+        prompt: "Tampilkan name siswa yang predikatnya 'A' (gpa >= 3.5) — pakai CASE di WHERE? Tidak bisa langsung. Gunakan gpa >= 3.5 di WHERE.",
+        hint: "WHERE gpa >= 3.5 (CASE hanya bisa di SELECT/ORDER BY, bukan WHERE)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gpa FROM students;",
+        solutionSql: "SELECT name FROM students WHERE gpa >= 3.5;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "case-orderby",
+      title: "Level 23 — CASE di ORDER BY",
+      description: "Urutkan data dengan aturan khusus memakai CASE di ORDER BY.",
+      orderIndex: 23,
+      concept: "CASE di ORDER BY",
+      explanation:
+        "CASE bisa dipakai di ORDER BY untuk membuat urutan khusus.\nContoh: urutkan kelas 7A dulu, baru 7B, lalu 8A:\n\nORDER BY CASE class_name\n  WHEN '7A' THEN 1\n  WHEN '7B' THEN 2\n  ELSE 3\nEND\n\nAngka kecil diurutkan lebih dulu.\n\nCoba: SELECT name, class_name FROM students ORDER BY CASE class_name WHEN '7A' THEN 1 ELSE 2 END;",
+    },
+    exercises: [
+      {
+        title: "Kelas 7A Dulu",
+        prompt: "Tampilkan name & class_name, urutkan: kelas 7A paling dulu, lainnya menyusul.",
+        hint: "ORDER BY CASE class_name WHEN '7A' THEN 1 ELSE 2 END",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, class_name FROM students;",
+        solutionSql:
+          "SELECT name, class_name FROM students ORDER BY CASE class_name WHEN '7A' THEN 1 ELSE 2 END;",
+      },
+      {
+        title: "Prioritas Kelas",
+        prompt: "Urutkan: 8A(1), 7A(2), 8B(3), lainnya(4). Tampilkan name & class_name.",
+        hint: "CASE class_name WHEN '8A' THEN 1 WHEN '7A' THEN 2 WHEN '8B' THEN 3 ELSE 4 END",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, class_name FROM students;",
+        solutionSql:
+          "SELECT name, class_name FROM students ORDER BY CASE class_name WHEN '8A' THEN 1 WHEN '7A' THEN 2 WHEN '8B' THEN 3 ELSE 4 END;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "case-boss",
+      title: "Level 24 — BOSS: CASE",
+      description: "Gabungkan CASE dengan agregasi dan fungsi lain.",
+      orderIndex: 24,
+      concept: "Ulasan CASE",
+      explanation:
+        "CASE sangat kuat digabung dengan agregasi. Trik: COUNT(CASE WHEN ... THEN 1 END) menghitung baris yang memenuhi kondisi saja.\n\nContoh hitung siswa laki-laki:\nSELECT COUNT(CASE WHEN gender = 'L' THEN 1 END) FROM students;\n\nCoba variasinya di soal!",
+    },
+    exercises: [
+      {
+        title: "Hitung Laki-laki (Boss)",
+        prompt: "Hitung jumlah siswa laki-laki memakai COUNT(CASE WHEN gender='L' THEN 1 END).",
+        hint: "SELECT COUNT(CASE WHEN gender = 'L' THEN 1 END) FROM students;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT COUNT(*) FROM students;",
+        solutionSql:
+          "SELECT COUNT(CASE WHEN gender = 'L' THEN 1 END) FROM students;",
+      },
+      {
+        title: "Jumlah per Gender (Boss)",
+        prompt: "Tampilkan gender dan jumlah siswa tiap gender (GROUP BY biasa).",
+        hint: "SELECT gender, COUNT(*) FROM students GROUP BY gender;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT gender FROM students;",
+        solutionSql: "SELECT gender, COUNT(*) FROM students GROUP BY gender;",
+      },
+      {
+        title: "Rata-rata Bersyarat (Boss)",
+        prompt: "Hitung rata-rata gpa khusus siswa perempuan memakai AVG(CASE WHEN gender='P' THEN gpa END).",
+        hint: "AVG(CASE WHEN gender = 'P' THEN gpa END) — NULL diabaikan AVG.",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT AVG(gpa) FROM students;",
+        solutionSql:
+          "SELECT AVG(CASE WHEN gender = 'P' THEN gpa END) FROM students;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "case-lanjutan",
+      title: "Level 25 — CASE Bertingkat & NULLIF",
+      description: "CASE dengan banyak kondisi dan fungsi NULLIF.",
+      orderIndex: 25,
+      concept: "NULLIF",
+      explanation:
+        "NULLIF(a, b) mengembalikan NULL kalau a = b, selain itu mengembalikan a.\nKegunaan: hindari pembagian dengan 0 → NULLIF(pembagi, 0).\n\nContoh: SELECT 10 / NULLIF(0, 0); → NULL (tidak error)\n\nCASE juga bisa dicek dengan AND/OR di dalam WHEN:\nWHEN gender = 'L' AND gpa >= 3.5 THEN 'Laki-laki Pintar'",
+    },
+    exercises: [
+      {
+        title: "Kategori Gabungan",
+        prompt: "Labeli siswa: 'Laki-laki Pintar' bila L dan gpa>=3.5, 'Perempuan Pintar' bila P dan gpa>=3.5, lainnya 'Siswa'.",
+        hint: "CASE WHEN gender='L' AND gpa>=3.5 THEN 'Laki-laki Pintar' WHEN gender='P' AND gpa>=3.5 THEN 'Perempuan Pintar' ELSE 'Siswa' END",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gender, gpa FROM students;",
+        solutionSql:
+          "SELECT name, CASE WHEN gender = 'L' AND gpa >= 3.5 THEN 'Laki-laki Pintar' WHEN gender = 'P' AND gpa >= 3.5 THEN 'Perempuan Pintar' ELSE 'Siswa' END FROM students;",
+      },
+      {
+        title: "Coba NULLIF",
+        prompt: "Tampilkan hasil 100 / NULLIF(0, 0) sebagai kolom 'hasil' — harusnya NULL bukan error.",
+        hint: "SELECT 100 / NULLIF(0, 0) AS hasil;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT 100 / 0 AS hasil;",
+        solutionSql: "SELECT 100 / NULLIF(0, 0) AS hasil;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "review-bab-c",
+      title: "Level 26 — Ulasan CASE & Fungsi",
+      description: "Latihan gabungan CASE, COALESCE, dan fungsi string.",
+      orderIndex: 26,
+      concept: "Review CASE & Fungsi",
+      explanation:
+        "Waktunya review! Bisa pakai:\n• CASE WHEN ... THEN ... ELSE ... END\n• COALESCE untuk NULL\n• UPPER/LOWER, LENGTH\n• CONCAT / ||\n\nTenang, baca soalnya baik-baik.",
+    },
+    exercises: [
+      {
+        title: "Email + Predikat",
+        prompt: "Tampilkan name, email (NULL jadi 'no-email'), dan predikat A/B/C berdasarkan gpa.",
+        hint: "COALESCE(email, 'no-email') + CASE gpa",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, email, gpa FROM students;",
+        solutionSql:
+          "SELECT name, COALESCE(email, 'no-email'), CASE WHEN gpa >= 3.5 THEN 'A' WHEN gpa >= 3.0 THEN 'B' ELSE 'C' END FROM students;",
+      },
+      {
+        title: "Sapa + Kelas",
+        prompt: "Tampilkan CONCAT('Halo ', UPPER(name)) dengan alias sapa untuk siswa kelas 8.",
+        hint: "WHERE class_name LIKE '8%'",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, class_name FROM students;",
+        solutionSql:
+          "SELECT CONCAT('Halo ', UPPER(name)) AS sapa FROM students WHERE class_name LIKE '8%';",
+      },
+    ],
+  },
+];
