@@ -1,6 +1,6 @@
 import { sqlite } from "./client";
 import { DATASET_FULL, DATASET_STUDENTS, levelSeeds } from "./content";
-import { DATASET_SCHOOL, extraLevelsA, extraLevelsB, extraLevelsC, extraLevelsD, extraLevelsE, extraLevelsF, extraLevelsG } from "./content-extra";
+import { DATASET_SCHOOL, extraLevelsA, extraLevelsB, extraLevelsC, extraLevelsD, extraLevelsE, extraLevelsF, extraLevelsG, extraLevelsH } from "./content-extra";
 import { generatePracticeLevels } from "./content-gen";
 import { introspectDataset } from "../lib/introspect-dataset";
 import type { DatasetSchema } from "../lib/introspect-dataset";
@@ -48,6 +48,7 @@ async function main() {
     ...extraLevelsE,
     ...extraLevelsF,
     ...extraLevelsG,
+    ...extraLevelsH,
     ...practiceLevels,
   ];
 

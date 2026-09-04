@@ -1272,3 +1272,135 @@ export const extraLevelsG: LevelSeed2[] = [
     ],
   },
 ];
+
+// ============================================================
+// BAB H — FUNGSI STRING LANJUTAN (level 101-106)
+// ============================================================
+export const extraLevelsH: LevelSeed2[] = [
+  {
+    level: {
+      slug: "string-replace",
+      title: "Level 101 — REPLACE",
+      description: "Ganti bagian teks dengan REPLACE.",
+      orderIndex: 101,
+      concept: "REPLACE",
+      explanation:
+        "REPLACE(teks, cari, ganti) mengganti SEMUA kemunculan 'cari' dengan 'ganti'.\n\nContoh: REPLACE('a.b.c', '.', '-') = 'a-b-c'\nKegunaan: bersihkan data, ganti format.\n\nCoba: SELECT REPLACE(email, '@mail.com', '@school.com') FROM students;",
+    },
+    exercises: [
+      {
+        title: "Ganti Domain Email",
+        prompt: "Tampilkan email dengan '@mail.com' diganti '@sekolah.com'.",
+        hint: "REPLACE(email, '@mail.com', '@sekolah.com')",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT email FROM students;",
+        solutionSql:
+          "SELECT REPLACE(email, '@mail.com', '@sekolah.com') FROM students;",
+      },
+      {
+        title: "Ganti Spasi dengan Garis",
+        prompt: "Tampilkan name dengan spasi diganti '_' (garis bawah).",
+        hint: "REPLACE(name, ' ', '_')",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name FROM students;",
+        solutionSql: "SELECT REPLACE(name, ' ', '_') FROM students;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "string-position",
+      title: "Level 102 — POSITION & STRPOS",
+      description: "Cari posisi teks di dalam teks dengan POSITION.",
+      orderIndex: 102,
+      concept: "POSITION",
+      explanation:
+        "POSITION('x' IN teks) atau STRPOS(teks, 'x') mengembalikan posisi (1 = awal) pertama kali 'x' muncul. 0 = tidak ditemukan.\n\nContoh: POSITION('@' IN 'budi@mail.com') = 5\n\nCoba: SELECT name, POSITION(' ' IN name) FROM students;",
+    },
+    exercises: [
+      {
+        title: "Posisi Spasi di Nama",
+        prompt: "Tampilkan name dan posisi spasi pertama di name (0 bila tidak ada).",
+        hint: "POSITION(' ' IN name)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name FROM students;",
+        solutionSql: "SELECT name, POSITION(' ' IN name) FROM students;",
+      },
+      {
+        title: "Posisi @ di Email",
+        prompt: "Tampilkan email dan posisi karakter '@' di email.",
+        hint: "POSITION('@' IN email)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT email FROM students;",
+        solutionSql: "SELECT email, POSITION('@' IN email) FROM students;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "string-trim",
+      title: "Level 103 — TRIM & LEFT/RIGHT",
+      description: "Bersihkan spasi (TRIM) dan ambil sisi kiri/kanan (LEFT/RIGHT).",
+      orderIndex: 103,
+      concept: "TRIM, LEFT, RIGHT",
+      explanation:
+        "• TRIM(teks) membuang spasi di awal & akhir.\n• LEFT(teks, n) mengambil n karakter dari kiri.\n• RIGHT(teks, n) mengambil n karakter dari kanan.\n\nContoh:\nLEFT('Budi Santoso', 4) = 'Budi'\nRIGHT('Budi Santoso', 6) = 'Santoso'\n\nCoba: SELECT name, LEFT(name, 4), RIGHT(name, 6) FROM students;",
+    },
+    exercises: [
+      {
+        title: "Nama Depan (LEFT)",
+        prompt: "Tampilkan name dan 4 huruf pertama name (LEFT).",
+        hint: "LEFT(name, 4)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name FROM students;",
+        solutionSql: "SELECT name, LEFT(name, 4) FROM students;",
+      },
+      {
+        title: "3 Huruf Terakhir",
+        prompt: "Tampilkan name dan 3 huruf terakhir name (RIGHT).",
+        hint: "RIGHT(name, 3)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name FROM students;",
+        solutionSql: "SELECT name, RIGHT(name, 3) FROM students;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "string-boss2",
+      title: "Level 104 — BOSS: String Lanjutan",
+      description: "Gabungkan REPLACE, POSITION, LEFT, TRIM.",
+      orderIndex: 104,
+      concept: "Ulasan String Lanjutan",
+      explanation:
+        "Review:\n• REPLACE(teks, cari, ganti)\n• POSITION('x' IN teks)\n• LEFT(teks, n), RIGHT(teks, n)\n• TRIM(teks)\n\nKombinasikan untuk memecahkan soal!",
+    },
+    exercises: [
+      {
+        title: "Username dari Email (Boss)",
+        prompt: "Ambil bagian email sebelum '@' (pakai LEFT + POSITION) untuk tiap email.",
+        hint: "LEFT(email, POSITION('@' IN email) - 1)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT email FROM students;",
+        solutionSql:
+          "SELECT LEFT(email, POSITION('@' IN email) - 1) FROM students WHERE email IS NOT NULL;",
+      },
+      {
+        title: "Nama Tanpa Spasi (Boss)",
+        prompt: "Tampilkan name dan name dengan spasi diganti '-' (REPLACE).",
+        hint: "REPLACE(name, ' ', '-')",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name FROM students;",
+        solutionSql: "SELECT name, REPLACE(name, ' ', '-') FROM students;",
+      },
+      {
+        title: "Inisial Nama (Boss)",
+        prompt: "Tampilkan inisial: huruf pertama name + titik. (LEFT(name,1) || '.')",
+        hint: "LEFT(name, 1) || '.'",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name FROM students;",
+        solutionSql: "SELECT name, LEFT(name, 1) || '.' AS inisial FROM students;",
+      },
+    ],
+  },
+];
