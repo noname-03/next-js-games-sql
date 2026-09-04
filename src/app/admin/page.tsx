@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { sql } from "drizzle-orm";
-import { ArrowLeft, BookOpen, ShieldCheck, Users, Zap } from "lucide-react";
+import { ArrowLeft, BookOpen, ShieldCheck, Timer, Users, Zap } from "lucide-react";
 import { db } from "@/db/client";
 import { exercises, levels, progress } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import AdminUsersTable from "@/components/AdminUsersTable";
+import AdminSettings from "@/components/AdminSettings";
 
 export const dynamic = "force-dynamic";
 
@@ -83,6 +84,14 @@ export default async function AdminPage() {
             <p className="text-xs font-bold text-ink-soft">Total XP User</p>
           </div>
         </div>
+      </section>
+
+      {/* Pengaturan timer & penalti */}
+      <section className="rounded-[1.75rem] bg-white/70 p-5 shadow-sm ring-1 ring-lilac backdrop-blur">
+        <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-extrabold text-grape">
+          <Timer className="h-5 w-5" /> Pengaturan Timer
+        </h2>
+        <AdminSettings />
       </section>
 
       {/* Manajemen user */}
