@@ -208,9 +208,143 @@ const topics: BankTopic[] = [
       ];
     },
   },
+  {
+    slug: "latihan-case",
+    title: () => "Latihan CASE",
+    concept: "Latihan CASE",
+    explanation:
+      "CASE membuat kolom baru berdasarkan kondisi:\nCASE WHEN kondisi THEN hasil ELSE hasil_lain END\n\nBisa dipakai untuk memberi label (bagus/cukup/kurang) pada angka.\nBisa juga di ORDER BY untuk urutan khusus.",
+    build: (n) => {
+      const cls = pick(CLASSES, n);
+      const subj = pick(SUBJECTS, n);
+      return [
+        {
+          title: `Label Nilai Mapel ${subj}`,
+          prompt: `Tampilkan student_id dan label score ujian subject ${subj}: >=85 'Bagus', >=70 'Cukup', lainnya 'Kurang'.`,
+          hint: `SELECT student_id, CASE WHEN score >= 85 THEN 'Bagus' WHEN score >= 70 THEN 'Cukup' ELSE 'Kurang' END FROM exam_scores WHERE subject_id = ${subj};`,
+          starterSql: `SELECT student_id, score FROM exam_scores WHERE subject_id = ${subj};`,
+          solutionSql: `SELECT student_id, CASE WHEN score >= 85 THEN 'Bagus' WHEN score >= 70 THEN 'Cukup' ELSE 'Kurang' END FROM exam_scores WHERE subject_id = ${subj};`,
+        },
+        {
+          title: `Predikat Kelas ${cls}`,
+          prompt: `Tampilkan name dan predikat siswa kelas ${cls}: gpa>=3.5 'A', >=3.0 'B', lainnya 'C'.`,
+          hint: `SELECT name, CASE WHEN gpa >= 3.5 THEN 'A' WHEN gpa >= 3.0 THEN 'B' ELSE 'C' END FROM students WHERE class_name = '${cls}';`,
+          starterSql: `SELECT name, gpa FROM students WHERE class_name = '${cls}';`,
+          solutionSql: `SELECT name, CASE WHEN gpa >= 3.5 THEN 'A' WHEN gpa >= 3.0 THEN 'B' ELSE 'C' END FROM students WHERE class_name = '${cls}';`,
+        },
+        {
+          title: "Urutkan Perempuan Dulu",
+          prompt: "Tampilkan name & gender siswa kelas 7, urutkan: Perempuan (P) lebih dulu, lalu Laki-laki (L).",
+          hint: "SELECT name, gender FROM students WHERE class_name LIKE '7%' ORDER BY CASE gender WHEN 'P' THEN 1 ELSE 2 END;",
+          starterSql: "SELECT name, gender FROM students WHERE class_name LIKE '7%';",
+          solutionSql:
+            "SELECT name, gender FROM students WHERE class_name LIKE '7%' ORDER BY CASE gender WHEN 'P' THEN 1 ELSE 2 END;",
+        },
+      ];
+    },
+  },
+  {
+    slug: "latihan-tanggal",
+    title: () => "Latihan Fungsi Tanggal",
+    concept: "Latihan Fungsi Tanggal",
+    explanation:
+      "Fungsi tanggal:\n• EXTRACT(YEAR/MONTH FROM tanggal)\n• AGE(tanggal) → umur\n• CURRENT_DATE → hari ini\n• Tanggal bisa dibandingkan: exam_date > '2024-03-12'\n\nLatihan memakai kolom birth_date & exam_date.",
+    build: (n) => {
+      const day = 10 + (n % 6); // 10..15 Maret 2024
+      return [
+        {
+          title: "Ujian Setelah Tanggal",
+          prompt: `Tampilkan student_id & exam_date ujian setelah tanggal '2024-03-${day}'.`,
+          hint: `WHERE exam_date > '2024-03-${day}'`,
+          starterSql: "SELECT student_id, exam_date FROM exam_scores;",
+          solutionSql: `SELECT student_id, exam_date FROM exam_scores WHERE exam_date > '2024-03-${day}';`,
+        },
+        {
+          title: "Siswa Lahir 2009",
+          prompt: "Tampilkan name siswa lahir tahun 2009 (EXTRACT(YEAR FROM birth_date) = 2009).",
+          hint: "WHERE EXTRACT(YEAR FROM birth_date) = 2009",
+          starterSql: "SELECT name, birth_date FROM students;",
+          solutionSql:
+            "SELECT name FROM students WHERE EXTRACT(YEAR FROM birth_date) = 2009;",
+        },
+        {
+          title: "Umur per Nama",
+          prompt: "Tampilkan name dan umur dalam tahun (EXTRACT(YEAR FROM AGE(birth_date))).",
+          hint: "EXTRACT(YEAR FROM AGE(birth_date))",
+          starterSql: "SELECT name, birth_date FROM students;",
+          solutionSql:
+            "SELECT name, EXTRACT(YEAR FROM AGE(birth_date)) FROM students;",
+        },
+      ];
+    },
+  },
+  {
+    slug: "latihan-window",
+    title: () => "Latihan Window",
+    concept: "Latihan Window",
+    explanation:
+      "Window function menghitung per baris tanpa menggabungkan:\nROW_NUMBER() OVER (ORDER BY ...)\nRANK() OVER (PARTITION BY ... ORDER BY ...)\nSUM/AVG OVER (...) untuk total/rata berjalan.\n\nBiasanya dibungkus CTE/subquery jika ingin difilter.",
+    build: (n) => {
+      const subj = pick(SUBJECTS, n);
+      return [
+        {
+          title: `Peringkat Ujian Mapel ${subj}`,
+          prompt: `Tampilkan student_id, score, dan ROW_NUMBER() urut score DESC untuk subject ${subj}.`,
+          hint: `SELECT student_id, score, ROW_NUMBER() OVER (ORDER BY score DESC) FROM exam_scores WHERE subject_id = ${subj};`,
+          starterSql: `SELECT student_id, score FROM exam_scores WHERE subject_id = ${subj};`,
+          solutionSql: `SELECT student_id, score, ROW_NUMBER() OVER (ORDER BY score DESC) FROM exam_scores WHERE subject_id = ${subj};`,
+        },
+        {
+          title: "Ranking per Mapel",
+          prompt: "Tampilkan student_id, subject_id, score, RANK() per subject urut score DESC.",
+          hint: "RANK() OVER (PARTITION BY subject_id ORDER BY score DESC)",
+          starterSql: "SELECT student_id, subject_id, score FROM exam_scores;",
+          solutionSql:
+            "SELECT student_id, subject_id, score, RANK() OVER (PARTITION BY subject_id ORDER BY score DESC) FROM exam_scores;",
+        },
+      ];
+    },
+  },
+  {
+    slug: "latihan-gabungan",
+    title: () => "Latihan Gabungan",
+    concept: "Latihan Gabungan (Multi-Konsep)",
+    explanation:
+      "Soal gabungan memakai beberapa konsep sekaligus: JOIN + GROUP BY + HAVING, atau subquery + agregasi.\n\nLangkah menaklukkan:\n1. Tentukan tabel yang terlibat\n2. Tulis JOIN bila perlu\n3. Kelompokkan (GROUP BY) untuk agregasi\n4. Saring dengan HAVING/WHERE\n\nBaca kebutuhan soal pelan-pelan!",
+    build: (n) => {
+      const minScore = 75 + (n % 3) * 5; // 75/80/85
+      return [
+        {
+          title: "Siswa Rata-rata di Atas Ambang",
+          prompt: `Tampilkan name siswa yang rata-rata nilainya di atas ${minScore} (JOIN + GROUP BY + HAVING).`,
+          hint: `SELECT s.name FROM students s JOIN exam_scores e ON s.id = e.student_id GROUP BY s.name HAVING AVG(e.score) > ${minScore};`,
+          starterSql: "SELECT s.name FROM students s;",
+          solutionSql: `SELECT s.name FROM students s JOIN exam_scores e ON s.id = e.student_id GROUP BY s.name HAVING AVG(e.score) > ${minScore};`,
+        },
+        {
+          title: "Jumlah Ujian di Atas Rata-rata",
+          prompt: "Tampilkan subject_id yang jumlah ujiannya di atas rata-rata jumlah ujian semua subject.",
+          hint: "SELECT subject_id, COUNT(*) FROM exam_scores GROUP BY subject_id HAVING COUNT(*) > (SELECT AVG(jml) FROM (SELECT COUNT(*) AS jml FROM exam_scores GROUP BY subject_id) sub);",
+          starterSql: "SELECT subject_id, COUNT(*) FROM exam_scores GROUP BY subject_id;",
+          solutionSql:
+            "SELECT subject_id, COUNT(*) FROM exam_scores GROUP BY subject_id HAVING COUNT(*) > (SELECT AVG(jml) FROM (SELECT COUNT(*) AS jml FROM exam_scores GROUP BY subject_id) sub);",
+        },
+      ];
+    },
+  },
 ];
 
-const TOPIC_NAMES = ["SELECT", "WHERE", "Agregasi", "GROUP BY", "JOIN"];
+const TOPIC_NAMES = [
+  "SELECT",
+  "WHERE",
+  "Agregasi",
+  "GROUP BY",
+  "JOIN",
+  "CASE",
+  "Fungsi Tanggal",
+  "Window",
+  "Gabungan",
+];
 
 export function generatePracticeLevels(startIndex: number, count: number): LevelSeed2[] {
   const levels: LevelSeed2[] = [];

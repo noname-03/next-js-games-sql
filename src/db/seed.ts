@@ -37,8 +37,8 @@ async function main() {
   await getSchema(DATASET_FULL);
   await getSchema(DATASET_SCHOOL);
 
-  // Gabungkan semua sumber level: bab manual + level latihan generator (45-100)
-  const practiceLevels = generatePracticeLevels(45, 56);
+  // Gabungkan semua sumber level: bab manual + level latihan generator (45-200)
+  const practiceLevels = generatePracticeLevels(45, 156);
   const allSeeds = [
     ...levelSeeds,
     ...extraLevelsA,
