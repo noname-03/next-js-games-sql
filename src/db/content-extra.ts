@@ -1039,3 +1039,106 @@ export const extraLevelsE: LevelSeed2[] = [
     ],
   },
 ];
+
+// ============================================================
+// BAB F — FUNGSI MATEMATIKA (level 38-42)
+// ============================================================
+export const extraLevelsF: LevelSeed2[] = [
+  {
+    level: {
+      slug: "math-round",
+      title: "Level 38 — ROUND & Pembulatan",
+      description: "Bulatkan angka dengan ROUND, CEIL, dan FLOOR.",
+      orderIndex: 38,
+      concept: "ROUND/CEIL/FLOOR",
+      explanation:
+        "• ROUND(angka, desimal) → bulatkan ke desimal tertentu. ROUND(3.75, 1) = 3.8\n• CEIL(angka) → bulatkan ke ATAS. CEIL(3.2) = 4\n• FLOOR(angka) → bulatkan ke BAWAH. FLOOR(3.8) = 3\n\nContoh:\nSELECT ROUND(AVG(score), 2) FROM exam_scores;\n\nCoba: SELECT ROUND(gpa, 1), CEIL(gpa), FLOOR(gpa) FROM students;",
+    },
+    exercises: [
+      {
+        title: "Bulatkan GPA",
+        prompt: "Tampilkan name, gpa, dan gpa dibulatkan 1 desimal (ROUND(gpa, 1)).",
+        hint: "ROUND(gpa, 1)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gpa FROM students;",
+        solutionSql: "SELECT name, gpa, ROUND(gpa, 1) FROM students;",
+      },
+      {
+        title: "Ceil & Floor GPA",
+        prompt: "Tampilkan name, CEIL(gpa), dan FLOOR(gpa).",
+        hint: "CEIL(gpa), FLOOR(gpa)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gpa FROM students;",
+        solutionSql: "SELECT name, CEIL(gpa), FLOOR(gpa) FROM students;",
+      },
+      {
+        title: "Rata-rata 2 Desimal",
+        prompt: "Tampilkan rata-rata score semua ujian dibulatkan 2 desimal.",
+        hint: "SELECT ROUND(AVG(score), 2) FROM exam_scores;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT AVG(score) FROM exam_scores;",
+        solutionSql: "SELECT ROUND(AVG(score), 2) FROM exam_scores;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "math-abs-mod",
+      title: "Level 39 — ABS & MOD",
+      description: "Nilai mutlak (ABS) dan sisa bagi (MOD).",
+      orderIndex: 39,
+      concept: "ABS & MOD",
+      explanation:
+        "• ABS(angka) → nilai mutlak (hilangkan minus). ABS(-5) = 5\n• MOD(a, b) → sisa pembagian a oleh b. MOD(7, 2) = 1\n\nKegunaan MOD: cek bilangan genap/ganjil (MOD(id, 2) = 0 berarti genap), atau kelompokkan.\n\nCoba: SELECT id, MOD(id, 2) FROM students;",
+    },
+    exercises: [
+      {
+        title: "Sisa Bagi ID",
+        prompt: "Tampilkan id dan MOD(id, 2) dari students (0=genap, 1=ganjil).",
+        hint: "SELECT id, MOD(id, 2) FROM students;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT id FROM students;",
+        solutionSql: "SELECT id, MOD(id, 2) FROM students;",
+      },
+      {
+        title: "ID Genap",
+        prompt: "Tampilkan name siswa dengan id genap (MOD(id, 2) = 0).",
+        hint: "WHERE MOD(id, 2) = 0",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, id FROM students;",
+        solutionSql: "SELECT name FROM students WHERE MOD(id, 2) = 0;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "math-boss",
+      title: "Level 40 — BOSS: Matematika & Agregasi",
+      description: "Gabungkan fungsi matematika dengan agregasi.",
+      orderIndex: 40,
+      concept: "Ulasan Fungsi Matematika",
+      explanation:
+        "Review:\n• ROUND(x, n), CEIL(x), FLOOR(x)\n• ABS(x), MOD(a, b)\n• Bisa dikombinasikan dengan AVG/SUM/MAX\n\nContoh:\nSELECT ROUND(MAX(score), 2) ...\nBoleh juga: ROUND(AVG(score)::numeric, 2) untuk presisi.",
+    },
+    exercises: [
+      {
+        title: "Rata-rata per Mapel (Boss)",
+        prompt: "Tampilkan subject_id dan rata-rata score per mapel, dibulatkan 2 desimal.",
+        hint: "SELECT subject_id, ROUND(AVG(score), 2) FROM exam_scores GROUP BY subject_id;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT subject_id, score FROM exam_scores;",
+        solutionSql:
+          "SELECT subject_id, ROUND(AVG(score), 2) FROM exam_scores GROUP BY subject_id;",
+      },
+      {
+        title: "Selisih dari Rata-rata (Boss)",
+        prompt: "Tampilkan student_id, score, dan ABS(score - AVG(score) OVER ()) sebagai jarak_dari_rata.",
+        hint: "ABS(score - AVG(score) OVER ())",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT student_id, score FROM exam_scores;",
+        solutionSql:
+          "SELECT student_id, score, ABS(score - AVG(score) OVER ()) AS jarak_dari_rata FROM exam_scores;",
+      },
+    ],
+  },
+];
