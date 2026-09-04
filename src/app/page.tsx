@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { BookOpen, Database, Heart, Map, Sparkles, Trophy, Zap } from "lucide-react";
+import { BookOpen, Database, Map, Sparkles, Trophy, Zap } from "lucide-react";
 import { db } from "@/db/client";
 import { exercises, levels, progress } from "@/db/schema";
 import LevelMap from "@/components/LevelMap";
@@ -112,11 +112,6 @@ export default async function Home() {
         </p>
         <LevelMap nodes={mapNodes} />
       </section>
-
-      <footer className="flex items-center justify-center gap-1.5 pb-6 text-sm font-bold text-ink-faint">
-        Dibuat dengan <Heart className="h-4 w-4 fill-rose text-rose" /> untuk para calon
-        master database
-      </footer>
     </main>
   );
 }

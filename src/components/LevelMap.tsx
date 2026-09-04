@@ -22,7 +22,7 @@ type LevelMapProps = {
 type Pt = { x: number; y: number };
 
 const STORAGE_KEY = "sqlquest-hero-index";
-const STEP_MS = 520; // durasi meluncur antar node
+const STEP_MS = 520; // durasi meluncur antar level
 const GAP_MS = 140; // jeda sebelum tiap langkah
 
 // Warna node bergantian biar peta ceria
@@ -32,6 +32,13 @@ const NODE_COLORS = [
   { bg: "#fff7ed", border: "#fb923c", text: "#ea580c" },
   { bg: "#d1fae5", border: "#34d399", text: "#059669" },
 ];
+
+/**
+ * Layout "rel kiri": semua nomor level sejajar di kolom kiri (seperti daftar/
+ * timeline), garis jalur & hero mengikuti kolom itu — tidak menutupi kartu.
+ * Kartu level di kanan berselang (genap rata kiri, ganjil rata kanan) supaya
+ * tetap terasa seperti peta berkelok.
+ */
 
 /**
  * Posisi hero: berdiri di node "open" pertama (level yang sedang dikerjakan).
@@ -54,6 +61,8 @@ export default function LevelMap({ nodes }: LevelMapProps) {
   const [heroPt, setHeroPt] = useState<Pt | null>(null);
   const [ready, setReady] = useState(false);
   const [moving, setMoving] = useState(false);
+  // Posisi garis jalur (rel kiri): top & tinggi dihitung dari titik node pertama & finish
+  const [rail, setRail] = useState<{ top: number; height: number } | null>(null);
 
   const target = heroTargetIndex(nodes);
 
@@ -70,13 +79,12 @@ export default function LevelMap({ nodes }: LevelMapProps) {
       const container = containerRef.current;
       if (!container) return [];
       const cRect = container.getBoundingClientRect();
-      const cx = cRect.width / 2;
       const pts: Pt[] = [];
       for (const dot of dotRefs.current) {
         if (!dot) continue;
         const r = dot.getBoundingClientRect();
         pts.push({
-          x: cx,
+          x: r.left + r.width / 2 - cRect.left,
           y: r.top + r.height / 2 - cRect.top,
         });
       }
@@ -84,7 +92,7 @@ export default function LevelMap({ nodes }: LevelMapProps) {
       if (fin) {
         const r = fin.getBoundingClientRect();
         pts.push({
-          x: cx,
+          x: r.left + r.width / 2 - cRect.left,
           y: r.top + r.height / 2 - cRect.top,
         });
       }
@@ -113,6 +121,9 @@ export default function LevelMap({ nodes }: LevelMapProps) {
       if (cancelled) return;
       const pts = measure();
       if (pts.length === 0) return;
+
+      // Gambar garis rel dari titik pertama sampai titik finish
+      setRail({ top: pts[0].y, height: pts[pts.length - 1].y - pts[0].y });
 
       let last = Math.min(readLast(), target);
       const reduceMotion =
@@ -151,15 +162,22 @@ export default function LevelMap({ nodes }: LevelMapProps) {
   return (
     <div
       ref={containerRef}
-      className="relative mx-auto flex w-full max-w-xl flex-col items-center"
+      className="relative mx-auto w-full max-w-xl"
     >
-      {/* Garis jalur utama */}
-      <div
-        aria-hidden
-        className="absolute bottom-4 top-4 w-1.5 rounded-full bg-gradient-to-b from-grape/50 via-pink/40 to-peach/60"
-      />
+      {/* Rel kiri: garis jalur di belakang node */}
+      {rail && (
+        <div
+          aria-hidden
+          className="absolute w-1.5 rounded-full bg-gradient-to-b from-grape/60 via-pink/50 to-peach/60"
+          style={{
+            left: 24 - 3, // pusat kolom node (24px) dikurangi separuh tebal garis
+            top: rail.top,
+            height: rail.height,
+          }}
+        />
+      )}
 
-      {/* Hero — karakter pemain */}
+      {/* Hero — berjalan di rel kiri (kolom nomor level) */}
       {ready && heroPt && (
         <div
           aria-hidden
@@ -174,7 +192,7 @@ export default function LevelMap({ nodes }: LevelMapProps) {
         >
           <div className="-translate-x-1/2 -translate-y-1/2">
             <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-grape to-pink text-white shadow-lg ring-4 ring-white/80 ${
+              className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-grape to-pink text-white shadow-lg ring-4 ring-white ${
                 moving ? "animate-bounce" : ""
               }`}
               style={moving ? { animationDuration: "420ms" } : undefined}
@@ -193,7 +211,8 @@ export default function LevelMap({ nodes }: LevelMapProps) {
           node.exerciseCount === 0
             ? 0
             : Math.round((node.doneCount / node.exerciseCount) * 100);
-        const offset = i % 2 === 0 ? "self-start" : "self-end";
+        // Genap: kartu di kiri dekat node · Ganjil: kartu di kanan (berselang)
+        const cardAlign = i % 2 === 1 ? "ml-auto" : "";
         const c = NODE_COLORS[i % NODE_COLORS.length];
 
         const badge = isLocked ? (
@@ -218,104 +237,102 @@ export default function LevelMap({ nodes }: LevelMapProps) {
         return (
           <div
             key={node.id}
-            className={`animate-pop-in relative z-10 mb-5 w-[88%] ${offset}`}
+            className="animate-pop-in relative z-10 mb-5 flex w-full items-center gap-3"
             style={{ animationDelay: `${i * 80}ms` }}
           >
-            <div className="flex items-center gap-3">
-              {/* Node bulat */}
-              <div
-                ref={(el) => {
-                  dotRefs.current[i] = el;
-                }}
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px]"
-                style={nodeStyle}
-              >
-                {badge}
-              </div>
-
-              {/* Kartu level */}
-              {isLocked ? (
-                <div className="flex-1 rounded-2xl border-2 border-lilac bg-white/60 px-4 py-3 opacity-75">
-                  <div className="font-display text-sm font-bold text-ink-faint">
-                    Level {node.orderIndex} · terkunci
-                  </div>
-                  <p className="mt-0.5 text-xs font-semibold text-ink-faint/80">
-                    selesaikan level sebelumnya untuk membuka
-                  </p>
-                </div>
-              ) : (
-                <Link
-                  href={`/learn/${node.slug}`}
-                  className="group flex-1 rounded-2xl border-2 border-lilac bg-white px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                  style={{ boxShadow: `0 4px 0 ${c.border}33` }}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-display text-sm font-extrabold text-ink group-hover:text-grape">
-                      {node.title}
-                    </span>
-                    <span className="rounded-full bg-lav px-2 py-0.5 text-xs font-extrabold text-ink-soft">
-                      {node.doneCount}/{node.exerciseCount}
-                      {isDone && <Check className="ml-1 inline h-3 w-3 text-sun" strokeWidth={3} />}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs font-semibold leading-relaxed text-ink-soft">
-                    {node.description}
-                  </p>
-                  <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-lav">
-                    <div
-                      className={`h-full rounded-full transition-all duration-700 ${
-                        isDone ? "bg-mint" : ""
-                      }`}
-                      style={{
-                        width: `${pct}%`,
-                        backgroundColor: isDone ? undefined : c.border,
-                      }}
-                    />
-                  </div>
-                </Link>
-              )}
+            {/* Node bulat bernomor — sejajar di kolom kiri */}
+            <div
+              ref={(el) => {
+                dotRefs.current[i] = el;
+              }}
+              className="z-20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px] bg-white"
+              style={nodeStyle}
+            >
+              {badge}
             </div>
+
+            {/* Kartu level — berselang kiri/kanan */}
+            {isLocked ? (
+              <div className={`flex-1 rounded-2xl border-2 border-lilac bg-white/60 px-4 py-3 opacity-75 ${cardAlign}`}>
+                <div className="font-display text-sm font-bold text-ink-faint">
+                  Level {node.orderIndex} · terkunci
+                </div>
+                <p className="mt-0.5 text-xs font-semibold text-ink-faint/80">
+                  selesaikan level sebelumnya untuk membuka
+                </p>
+              </div>
+            ) : (
+              <Link
+                href={`/learn/${node.slug}`}
+                className={`group flex-1 rounded-2xl border-2 border-lilac bg-white px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${cardAlign}`}
+                style={{ boxShadow: `0 4px 0 ${c.border}33` }}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-display text-sm font-extrabold text-ink group-hover:text-grape">
+                    {node.title}
+                  </span>
+                  <span className="rounded-full bg-lav px-2 py-0.5 text-xs font-extrabold text-ink-soft">
+                    {node.doneCount}/{node.exerciseCount}
+                    {isDone && (
+                      <Check className="ml-1 inline h-3 w-3 text-sun" strokeWidth={3} />
+                    )}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs font-semibold leading-relaxed text-ink-soft">
+                  {node.description}
+                </p>
+                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-lav">
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 ${
+                      isDone ? "bg-mint" : ""
+                    }`}
+                    style={{
+                      width: `${pct}%`,
+                      backgroundColor: isDone ? undefined : c.border,
+                    }}
+                  />
+                </div>
+              </Link>
+            )}
           </div>
         );
       })}
 
-      {/* Garis akhir */}
+      {/* Garis akhir — juga di rel kiri */}
       <div
         key="finish"
-        className="animate-pop-in relative z-10 mb-2 w-[88%] self-center"
+        className="animate-pop-in relative z-10 mb-2 flex w-full items-center gap-3"
         style={{ animationDelay: `${nodes.length * 80}ms` }}
       >
-        <div className="flex items-center gap-3">
+        <div
+          ref={finishDotRef}
+          className={`z-20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px] bg-white transition ${
+            allDone
+              ? "border-sun bg-sun/20 text-peach"
+              : "border-lilac text-ink-faint opacity-80"
+          }`}
+        >
+          <Flag className="h-6 w-6" />
+        </div>
+        <div
+          className={`flex-1 rounded-2xl border-2 px-4 py-3 transition ${
+            allDone
+              ? "border-sun bg-sun/10"
+              : "border-lilac bg-white/60 opacity-70"
+          }`}
+        >
           <div
-            ref={finishDotRef}
-            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px] transition ${
-              allDone
-                ? "border-sun bg-sun/20 text-peach"
-                : "border-lilac bg-white/70 text-ink-faint"
+            className={`flex items-center gap-1.5 font-display text-sm font-extrabold ${
+              allDone ? "text-peach" : "text-ink-faint"
             }`}
           >
-            <Flag className="h-6 w-6" />
+            <Flag className="h-4 w-4" /> FINISH
           </div>
-          <div
-            className={`flex-1 rounded-2xl border-2 px-4 py-3 transition ${
-              allDone
-                ? "border-sun bg-sun/10"
-                : "border-lilac bg-white/60 opacity-70"
-            }`}
-          >
-            <div
-              className={`flex items-center gap-1.5 font-display text-sm font-extrabold ${
-                allDone ? "text-peach" : "text-ink-faint"
-              }`}
-            >
-              <Flag className="h-4 w-4" /> FINISH
-            </div>
-            <p className="mt-0.5 text-xs font-semibold text-ink-soft">
-              {allDone
-                ? "kamu sudah menaklukkan semua level — luar biasa!"
-                : "garis akhir petualanganmu"}
-            </p>
-          </div>
+          <p className="mt-0.5 text-xs font-semibold text-ink-soft">
+            {allDone
+              ? "kamu sudah menaklukkan semua level — luar biasa!"
+              : "garis akhir petualanganmu"}
+          </p>
         </div>
       </div>
     </div>
