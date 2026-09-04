@@ -63,22 +63,20 @@ export async function GET(request: Request) {
   let rows: LeaderRow[] = [];
 
   if (mode === "speed") {
-    // --- KECEPATAN: total durasi; bab = wajib tuntas semua exercise bab ---
+    // --- KECEPATAN: total durasi; diurutkan dari terkecil ---
     let list: { userId: number; totalMs: number }[] = [];
     if (bab !== null) {
       const perUser = db
         .select({
           userId: progress.userId,
           totalMs: sql<number>`coalesce(sum(${progress.durationMs}), 0)`,
-          doneCount: sql<number>`count(*)`,
         })
         .from(progress)
         .where(sql`${progress.userId} IS NOT NULL AND ${progress.durationMs} IS NOT NULL${exFilter}`)
         .groupBy(progress.userId)
         .all();
-      // hanya yang tuntas SEMUA exercise bab
       list = perUser
-        .filter((r) => r.userId !== null && r.doneCount >= chapterExerciseIds.length)
+        .filter((r) => r.userId !== null)
         .map((r) => ({ userId: r.userId as number, totalMs: r.totalMs }));
     } else {
       const perUser = db

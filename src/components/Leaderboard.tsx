@@ -78,11 +78,7 @@ export default function Leaderboard({ bab = null }: LeaderboardProps) {
         </div>
       </div>
 
-      {mode === "speed" && bab !== null && (
-        <p className="mb-2 text-[11px] font-bold text-ink-soft">
-          Hanya yang menuntaskan semua soal bab ini yang masuk.
-        </p>
-      )}
+      {/* hint dihapus: per-bab speed kini menampilkan semua user dengan data durasi */}
 
       {loading ? (
         <div className="flex items-center justify-center gap-2 py-6 text-ink-soft">
