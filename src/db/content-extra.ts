@@ -1142,3 +1142,133 @@ export const extraLevelsF: LevelSeed2[] = [
     ],
   },
 ];
+
+// ============================================================
+// BAB G — CTE (WITH) & SELF-JOIN (level 41-46)
+// ============================================================
+export const extraLevelsG: LevelSeed2[] = [
+  {
+    level: {
+      slug: "cte-dasar",
+      title: "Level 41 — CTE / WITH",
+      description: "Buat 'tabel sementara' bernama di awal query dengan WITH.",
+      orderIndex: 41,
+      concept: "CTE (WITH)",
+      explanation:
+        "CTE (Common Table Expression) membuat tabel sementara bernama di awal query supaya mudah dibaca & dipakai ulang.\n\nBentuk:\nWITH nama AS (\n  SELECT ...\n)\nSELECT ... FROM nama;\n\nContoh:\nWITH siswa_pintar AS (\n  SELECT name, gpa FROM students WHERE gpa >= 3.5\n)\nSELECT * FROM siswa_pintar;\n\nCTE hanya hidup dalam satu query — beda dengan tabel beneran.",
+    },
+    exercises: [
+      {
+        title: "CTE Siswa Pintar",
+        prompt: "Buat CTE siswa_pintar berisi name & gpa siswa gpa >= 3.5, lalu SELECT semua dari CTE itu.",
+        hint: "WITH siswa_pintar AS (SELECT name, gpa FROM students WHERE gpa >= 3.5) SELECT * FROM siswa_pintar;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gpa FROM students;",
+        solutionSql:
+          "WITH siswa_pintar AS (SELECT name, gpa FROM students WHERE gpa >= 3.5) SELECT * FROM siswa_pintar;",
+      },
+      {
+        title: "CTE + Agregasi",
+        prompt: "Buat CTE k7 berisi gpa siswa kelas 7, lalu hitung AVG(gpa) dari CTE tsb.",
+        hint: "WITH k7 AS (SELECT gpa FROM students WHERE class_name LIKE '7%') SELECT AVG(gpa) FROM k7;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT AVG(gpa) FROM students;",
+        solutionSql:
+          "WITH k7 AS (SELECT gpa FROM students WHERE class_name LIKE '7%') SELECT AVG(gpa) FROM k7;",
+      },
+      {
+        title: "Dua CTE",
+        prompt: "Buat CTE laki (siswa L) dan perempuan (siswa P), lalu hitung jumlah keduanya dengan UNION ALL.",
+        hint: "WITH laki AS (...), perempuan AS (...) SELECT 'L', COUNT(*) FROM laki UNION ALL SELECT 'P', COUNT(*) FROM perempuan;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT gender, COUNT(*) FROM students GROUP BY gender;",
+        solutionSql:
+          "WITH laki AS (SELECT * FROM students WHERE gender = 'L'), perempuan AS (SELECT * FROM students WHERE gender = 'P') SELECT 'L', COUNT(*) FROM laki UNION ALL SELECT 'P', COUNT(*) FROM perempuan;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "cte-window",
+      title: "Level 42 — CTE + Window (Bersih & Rapi)",
+      description: "Gabungkan CTE dengan window function untuk query bertingkat yang rapi.",
+      orderIndex: 42,
+      concept: "CTE + Window",
+      explanation:
+        "Window function tidak bisa langsung dipakai di WHERE. Triknya: hitung di CTE, lalu filter di query luar.\n\nContoh ambil peringkat 1 tiap kelas:\nWITH berperingkat AS (\n  SELECT name, class_name, gpa,\n    ROW_NUMBER() OVER (PARTITION BY class_name ORDER BY gpa DESC) AS peringkat\n  FROM students\n)\nSELECT * FROM berperingkat WHERE peringkat = 1;\n\nIni pola sangat umum di dunia nyata!",
+    },
+    exercises: [
+      {
+        title: "Juara 1 per Kelas",
+        prompt: "Pakai CTE berperingkat (ROW_NUMBER per kelas urut gpa DESC), tampilkan siswa peringkat 1 tiap kelas.",
+        hint: "WITH berperingkat AS (...) SELECT name, class_name, gpa FROM berperingkat WHERE peringkat = 1;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, class_name, gpa FROM students;",
+        solutionSql:
+          "WITH berperingkat AS (SELECT name, class_name, gpa, ROW_NUMBER() OVER (PARTITION BY class_name ORDER BY gpa DESC) AS peringkat FROM students) SELECT name, class_name, gpa FROM berperingkat WHERE peringkat = 1;",
+      },
+      {
+        title: "Di Atas Rata-rata Kelas via CTE",
+        prompt: "CTE rata_kelas berisi rata-rata gpa per kelas; gabung dengan students untuk siswa di atas rata-rata kelasnya.",
+        hint: "WITH rata_kelas AS (SELECT class_name, AVG(gpa) AS rata FROM students GROUP BY class_name) SELECT s.name FROM students s JOIN rata_kelas r ON s.class_name = r.class_name WHERE s.gpa > r.rata;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gpa FROM students;",
+        solutionSql:
+          "WITH rata_kelas AS (SELECT class_name, AVG(gpa) AS rata FROM students GROUP BY class_name) SELECT s.name FROM students s JOIN rata_kelas r ON s.class_name = r.class_name WHERE s.gpa > r.rata;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "self-join",
+      title: "Level 43 — Self-Join",
+      description: "Gabungkan tabel dengan dirinya sendiri untuk membandingkan baris.",
+      orderIndex: 43,
+      concept: "Self-Join",
+      explanation:
+        "Self-join = JOIN tabel dengan dirinya sendiri. Tiap 'salinan' diberi alias beda.\n\nKegunaan: bandingkan baris dalam tabel yang sama.\nContoh cari siswa yang gpa-nya lebih tinggi dari siswa lain di kelas yang sama:\nSELECT a.name, b.name AS dibanding_dengan\nFROM students a\nJOIN students b ON a.class_name = b.class_name\nWHERE a.gpa > b.gpa;\n\nPenting: selalu pakai alias (a & b) supaya tidak bingung.",
+    },
+    exercises: [
+      {
+        title: "Siswa di Atas Siswa Lain",
+        prompt: "Tampilkan pasangan nama (a.name, b.name) di kelas sama di mana gpa a > gpa b.",
+        hint: "FROM students a JOIN students b ON a.class_name = b.class_name WHERE a.gpa > b.gpa",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT a.name, b.name FROM students a JOIN students b ON a.class_name = b.class_name;",
+        solutionSql:
+          "SELECT a.name, b.name FROM students a JOIN students b ON a.class_name = b.class_name WHERE a.gpa > b.gpa;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "review-join-lanjut",
+      title: "Level 44 — Review: JOIN + CTE",
+      description: "Latihan gabungan JOIN, CTE, dan agregasi.",
+      orderIndex: 44,
+      concept: "Review JOIN & CTE",
+      explanation:
+        "Gabungkan semua skill: JOIN tabel, CTE untuk merapikan, agregasi.\nContoh pola: CTE hitung jumlah ujian per siswa → JOIN ke students → tampilkan nama + jumlah.\n\nIngat urutan logika: WITH ... , SELECT ... JOIN ... GROUP BY ...",
+    },
+    exercises: [
+      {
+        title: "Jumlah Ujian per Siswa",
+        prompt: "Tampilkan name dan jumlah ujian yang diambil tiap siswa (JOIN students & exam_scores + GROUP BY).",
+        hint: "SELECT s.name, COUNT(e.id) FROM students s JOIN exam_scores e ON s.id = e.student_id GROUP BY s.name;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT s.name FROM students s;",
+        solutionSql:
+          "SELECT s.name, COUNT(e.id) FROM students s JOIN exam_scores e ON s.id = e.student_id GROUP BY s.name;",
+      },
+      {
+        title: "Rata-rata per Siswa (via CTE)",
+        prompt: "CTE rata_siswa (AVG score per student_id); gabung students; tampilkan name & rata 2 desimal.",
+        hint: "WITH rata_siswa AS (SELECT student_id, AVG(score) AS rata FROM exam_scores GROUP BY student_id) SELECT s.name, ROUND(r.rata, 2) FROM students s JOIN rata_siswa r ON s.id = r.student_id;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT s.name FROM students s;",
+        solutionSql:
+          "WITH rata_siswa AS (SELECT student_id, AVG(score) AS rata FROM exam_scores GROUP BY student_id) SELECT s.name, ROUND(r.rata, 2) FROM students s JOIN rata_siswa r ON s.id = r.student_id;",
+      },
+    ],
+  },
+];
