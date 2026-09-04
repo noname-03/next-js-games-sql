@@ -106,7 +106,7 @@ function DataTable({ columns, rows }: { columns: { name: string; isPk: boolean }
 }
 
 export default function SchemaExplorer({ schemaJson, open, onToggle }: SchemaExplorerProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   let schema: DatasetSchema | null = null;
   if (schemaJson) {
