@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/db/client";
+import { getCurrentUser } from "@/lib/auth";
 import { exercises, levels, progress } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import LearningLayout from "@/components/LearningLayout";
@@ -13,6 +14,8 @@ export default async function LearnLevelPage({
   params: Promise<{ levelSlug: string }>;
 }) {
   const { levelSlug } = await params;
+  const user = await getCurrentUser();
+  const userId = user?.id ?? null;
 
   const level = db
     .select()
@@ -29,18 +32,20 @@ export default async function LearnLevelPage({
     .orderBy(exercises.orderIndex)
     .all();
 
-  const progressRows = db
-    .select()
-    .from(progress)
-    .where(
-      sql`${progress.exerciseId} IN (${sql.join(
-        levelExercises.map((e) => sql`${e.id}`),
-        sql`, `
-      )})`
-    )
-    .all();
-
-  const completedIds = new Set(progressRows.map((p) => p.exerciseId));
+  const completedIds = new Set<number>();
+  if (userId !== null && levelExercises.length > 0) {
+    const progressRows = db
+      .select()
+      .from(progress)
+      .where(
+        sql`${progress.userId} = ${userId} AND ${progress.exerciseId} IN (${sql.join(
+          levelExercises.map((e) => sql`${e.id}`),
+          sql`, `
+        )})`
+      )
+      .all();
+    for (const pr of progressRows) completedIds.add(pr.exerciseId);
+  }
   const allDone =
     levelExercises.length > 0 && completedIds.size >= levelExercises.length;
 

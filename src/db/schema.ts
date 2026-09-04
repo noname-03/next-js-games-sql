@@ -26,8 +26,18 @@ export const exercises = sqliteTable("exercises", {
   orderIndex: integer("order_index").notNull(),
 });
 
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  displayName: text("display_name").notNull(),
+  role: text("role", { enum: ["admin", "user"] }).notNull().default("user"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
 export const progress = sqliteTable("progress", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
   exerciseId: integer("exercise_id")
     .notNull()
     .references(() => exercises.id, { onDelete: "cascade" }),
@@ -42,3 +52,5 @@ export type NewLevel = typeof levels.$inferInsert;
 export type Exercise = typeof exercises.$inferSelect;
 export type NewExercise = typeof exercises.$inferInsert;
 export type ProgressRow = typeof progress.$inferSelect;
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;

@@ -2,10 +2,16 @@ import { NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { progress } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
+import { getSessionUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+  const session = await getSessionUser();
+  if (!session) {
+    return NextResponse.json({ error: "Silakan login dulu" }, { status: 401 });
+  }
+
   let body: { exerciseId?: number; attempts?: number; xp?: number };
   try {
     body = await request.json();
@@ -24,11 +30,15 @@ export async function POST(request: Request) {
   const existing = db
     .select({ id: progress.id })
     .from(progress)
-    .where(eq(progress.exerciseId, exerciseId))
+    .where(
+      and(
+        eq(progress.userId, session.id),
+        eq(progress.exerciseId, exerciseId)
+      )
+    )
     .get();
 
   if (existing) {
-    // Sudah pernah selesai: jangan tambah XP dobel, cukup perbarui attempt terakhir
     db.update(progress)
       .set({
         attempts,
@@ -40,6 +50,7 @@ export async function POST(request: Request) {
   } else {
     db.insert(progress)
       .values({
+        userId: session.id,
         exerciseId,
         status: "done",
         attempts,

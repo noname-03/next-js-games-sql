@@ -103,6 +103,35 @@ async function main() {
     );
   }
 
+  // Akun admin bawaan (bila belum ada)
+  const adminExists = sqlite
+    .prepare("SELECT id FROM users WHERE username = ?")
+    .get("admin");
+  if (!adminExists) {
+    const { hashPassword } = await import("../lib/auth");
+    const passwordHash = await hashPassword(
+      process.env.ADMIN_PASSWORD || "admin123"
+    );
+    sqlite
+      .prepare(
+        "INSERT INTO users (username, password_hash, display_name, role, created_at) VALUES (?, ?, ?, ?, ?)"
+      )
+      .run(
+        "admin",
+        passwordHash,
+        "Administrator",
+        "admin",
+        Math.floor(Date.now() / 1000) // drizzle timestamp mode = detik
+      );
+    console.log(
+      "  Akun admin dibuat (username: admin, password: " +
+        (process.env.ADMIN_PASSWORD ? "dari env ADMIN_PASSWORD" : "admin123 — segera ganti!") +
+        ")"
+    );
+  } else {
+    console.log("  Akun admin sudah ada.");
+  }
+
   console.log("Seed selesai.");
 }
 
