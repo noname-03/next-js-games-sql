@@ -345,3 +345,155 @@ export const extraLevelsA: LevelSeed2[] = [
     ],
   },
 ];
+
+// ============================================================
+// BAB B — FUNGSI TANGGAL & WAKTU (level 17-21)
+// ============================================================
+export const extraLevelsB: LevelSeed2[] = [
+  {
+    level: {
+      slug: "tanggal-extract",
+      title: "Level 17 — EXTRACT (Ambil Bagian Tanggal)",
+      description: "Ambil tahun, bulan, atau hari dari sebuah tanggal dengan EXTRACT.",
+      orderIndex: 17,
+      concept: "EXTRACT",
+      explanation:
+        "EXTRACT(bagian FROM tanggal) mengambil satu bagian dari tanggal.\nBagian yang bisa diambil: YEAR, MONTH, DAY, HOUR, dll.\n\nContoh: EXTRACT(YEAR FROM DATE '2024-03-10') = 2024\nEXTRACT(MONTH FROM birth_date) = bulan lahir siswa.\n\nCoba: SELECT name, EXTRACT(YEAR FROM birth_date) FROM students;",
+    },
+    exercises: [
+      {
+        title: "Tahun Lahir",
+        prompt: "Tampilkan name dan tahun lahir (EXTRACT YEAR dari birth_date) setiap siswa.",
+        hint: "EXTRACT(YEAR FROM birth_date)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, birth_date FROM students;",
+        solutionSql: "SELECT name, EXTRACT(YEAR FROM birth_date) FROM students;",
+      },
+      {
+        title: "Bulan Lahir",
+        prompt: "Tampilkan name dan bulan lahir (angka 1-12) setiap siswa.",
+        hint: "EXTRACT(MONTH FROM birth_date)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, birth_date FROM students;",
+        solutionSql: "SELECT name, EXTRACT(MONTH FROM birth_date) FROM students;",
+      },
+      {
+        title: "Filter Tahun Lahir",
+        prompt: "Tampilkan name siswa yang lahir tahun 2009.",
+        hint: "WHERE EXTRACT(YEAR FROM birth_date) = 2009",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, birth_date FROM students;",
+        solutionSql:
+          "SELECT name FROM students WHERE EXTRACT(YEAR FROM birth_date) = 2009;",
+      },
+      {
+        title: "Tanggal Ujian per Tahun",
+        prompt: "Tampilkan tahun ujian (dari exam_date) dan jumlah ujian tiap tahun, dari tabel exam_scores.",
+        hint: "GROUP BY EXTRACT(YEAR FROM exam_date)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT exam_date FROM exam_scores;",
+        solutionSql:
+          "SELECT EXTRACT(YEAR FROM exam_date), COUNT(*) FROM exam_scores GROUP BY EXTRACT(YEAR FROM exam_date);",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "tanggal-age",
+      title: "Level 18 — AGE (Umur)",
+      description: "Hitung umur seseorang berdasarkan tanggal lahir dengan AGE.",
+      orderIndex: 18,
+      concept: "AGE",
+      explanation:
+        "AGE(tanggal_lahir) menghitung umur sejak tanggal lahir sampai hari ini.\nHasilnya interval seperti '15 years 4 mons 12 days'.\n\nAGE(tanggal_awal, tanggal_akhir) menghitung jarak dua tanggal.\nContoh: AGE(DATE '2010-01-25') → umur siswa itu sekarang.\n\nCoba: SELECT name, AGE(birth_date) FROM students;",
+    },
+    exercises: [
+      {
+        title: "Umur Siswa",
+        prompt: "Tampilkan name dan umur (AGE dari birth_date) setiap siswa.",
+        hint: "SELECT name, AGE(birth_date) FROM students;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, birth_date FROM students;",
+        solutionSql: "SELECT name, AGE(birth_date) FROM students;",
+      },
+      {
+        title: "Umur per Kelas",
+        prompt: "Tampilkan class_name dan umur rata-rata siswa per kelas (pakai AVG(AGE(birth_date))).",
+        hint: "GROUP BY class_name + AVG(AGE(birth_date))",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT class_name, birth_date FROM students;",
+        solutionSql:
+          "SELECT class_name, AVG(AGE(birth_date)) FROM students GROUP BY class_name;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "tanggal-current",
+      title: "Level 19 — CURRENT_DATE & Filter Tanggal",
+      description: "Tanggal hari ini dengan CURRENT_DATE dan membandingkan tanggal.",
+      orderIndex: 19,
+      concept: "CURRENT_DATE",
+      explanation:
+        "CURRENT_DATE mengembalikan tanggal hari ini (sesuai server).\nBerguna untuk filter data 'sampai hari ini', '7 hari terakhir', dll.\n\nContoh: SELECT CURRENT_DATE; → 2024-xx-xx\nFilter: WHERE exam_date < CURRENT_DATE (ujian yang sudah lewat).\n\nUntuk mundur waktu: CURRENT_DATE - INTERVAL '7 days'.",
+    },
+    exercises: [
+      {
+        title: "Tampilkan Hari Ini",
+        prompt: "Tampilkan CURRENT_DATE sebagai kolom 'hari_ini'.",
+        hint: "SELECT CURRENT_DATE AS hari_ini;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT CURRENT_DATE;",
+        solutionSql: "SELECT CURRENT_DATE AS hari_ini;",
+      },
+      {
+        title: "Ujian 7 Hari Terakhir",
+        prompt: "Tampilkan student_id dan exam_date dari ujian yang tanggalnya >= 7 hari sebelum hari ini.",
+        hint: "WHERE exam_date >= CURRENT_DATE - INTERVAL '7 days'",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT student_id, exam_date FROM exam_scores;",
+        solutionSql:
+          "SELECT student_id, exam_date FROM exam_scores WHERE exam_date >= CURRENT_DATE - INTERVAL '7 days';",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "tanggal-boss",
+      title: "Level 20 — BOSS: Fungsi Tanggal",
+      description: "Tantangan menggabungkan EXTRACT, AGE, dan CURRENT_DATE.",
+      orderIndex: 20,
+      concept: "Ulasan Fungsi Tanggal",
+      explanation:
+        "Level BOSS tanggal! Ingat:\n• EXTRACT(YEAR/MONTH/DAY FROM tanggal) mengambil bagian\n• AGE(birth_date) menghitung umur\n• CURRENT_DATE = hari ini\n• INTERVAL 'N days' untuk maju/mundur\n\nSusun langkahnya pelan-pelan!",
+    },
+    exercises: [
+      {
+        title: "Umur dalam Tahun (Boss)",
+        prompt: "Tampilkan name dan umur dalam TAHUN (pakai EXTRACT(YEAR FROM AGE(birth_date))) setiap siswa.",
+        hint: "EXTRACT(YEAR FROM AGE(birth_date))",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, birth_date FROM students;",
+        solutionSql:
+          "SELECT name, EXTRACT(YEAR FROM AGE(birth_date)) FROM students;",
+      },
+      {
+        title: "Siswa Lahir Bulan Ini (Boss)",
+        prompt: "Tampilkan name siswa yang bulan lahirnya sama dengan bulan sekarang (EXTRACT(MONTH FROM CURRENT_DATE)).",
+        hint: "WHERE EXTRACT(MONTH FROM birth_date) = EXTRACT(MONTH FROM CURRENT_DATE)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, birth_date FROM students;",
+        solutionSql:
+          "SELECT name FROM students WHERE EXTRACT(MONTH FROM birth_date) = EXTRACT(MONTH FROM CURRENT_DATE);",
+      },
+      {
+        title: "Ujian Paling Baru (Boss)",
+        prompt: "Tampilkan tanggal ujian terbaru di tabel exam_scores.",
+        hint: "SELECT MAX(exam_date) FROM exam_scores;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT exam_date FROM exam_scores;",
+        solutionSql: "SELECT MAX(exam_date) FROM exam_scores;",
+      },
+    ],
+  },
+];
