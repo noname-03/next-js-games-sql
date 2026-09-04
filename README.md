@@ -1,20 +1,42 @@
 # SQL Quest — Game Pembelajaran SQL
 
-Game/learning app SQL interaktif bergaya **dark retro-terminal**. Siswa menulis query
-SQL sungguhan di browser dan dieksekusi oleh **PostgreSQL asli** (via
-PGlite/WebAssembly) — tanpa perlu server database terpisah saat deploy.
+Game/learning app SQL interaktif bergaya **pastel futuristik** yang ramah anak SMP.
+Siswa menulis query SQL sungguhan di browser dan dieksekusi oleh **PostgreSQL asli**
+(via PGlite/WebAssembly) — tanpa perlu server database terpisah saat deploy.
 
 ## Fitur
 
-- **10 level kurikulum progresif** (49 soal): SELECT dasar → WHERE → ORDER BY/LIMIT →
-  agregasi → GROUP BY/HAVING → subquery → INNER JOIN → LEFT JOIN → JOIN+agregasi →
-  tantangan puncak.
-- **Panel skema database** di tiap level: lihat tabel, kolom, tipe, PK/FK, dan contoh
-  data sebelum mengerjakan soal (dibangkitkan otomatis dari dataset).
-- **Level map** di beranda: peta petualangan zigzag dengan status terkunci/terbuka/selesai.
+- **200 level kurikulum** (794 soal): dari SELECT dasar sampai CTE, window functions,
+  dan subquery berkorelasi.
+- **Materi per level**: setiap level yang memperkenalkan istilah baru (UPPER, JOIN,
+  COALESCE, dst) menampilkan kartu penjelasan SEBELUM soal — istilah dijelaskan dulu,
+  baru diminta dipakai.
+- **Panel skema database** di halaman level: lihat tabel, kolom, tipe, PK/FK, dan
+  seluruh isi data dengan pagination + nama kolom.
+- **Peta misi ular + hero** di tiap level: karakter maju tiap jawaban benar.
+- **Layout 3 kolom** ala workspace belajar: peta misi di kiri (sticky), soal di tengah
+  (4 soal per halaman), data & skema di kanan (sticky) — rail kiri/kanan bisa
+  disembunyikan.
+- **Level map** di beranda: peta petualangan dengan status terkunci/terbuka/selesai,
+  hero melaju di jalur khusus di kiri.
 - **Eksekusi query di PostgreSQL asli** (PGlite WASM) di browser, validasi hasil
   dibandingkan dengan solusi (bukan pencocokan string).
-- **Game feel**: XP, animasi sukses + konfeti, progress bar, tema terminal konsisten.
+- **Game feel**: XP, animasi sukses + konfeti, progress bar.
+
+## Kurikulum (bab)
+
+1. Level 1-10: SELECT dasar, WHERE, ORDER/LIMIT, agregasi, GROUP BY/HAVING, subquery,
+   INNER/LEFT JOIN, JOIN+agregasi, tantangan
+2. Level 11-16: fungsi string (UPPER/LOWER, LENGTH, SUBSTRING, CONCAT) & COALESCE
+3. Level 17-20: fungsi tanggal (EXTRACT, AGE, CURRENT_DATE)
+4. Level 21-26: CASE & logika kondisi, NULLIF
+5. Level 27-32: subquery lanjutan (FROM, EXISTS, correlated), UNION/INTERSECT/EXCEPT
+6. Level 33-37: window functions (ROW_NUMBER, RANK, LAG, SUM/AVG OVER)
+7. Level 38-40: fungsi matematika (ROUND, CEIL, FLOOR, ABS, MOD)
+8. Level 41-44: CTE (WITH) & self-join
+9. Level 101-104: string lanjutan (REPLACE, POSITION, TRIM, LEFT/RIGHT)
+10. Level 45-100 & 105-200: latihan terstruktur 9 topik (SELECT, WHERE, agregasi,
+    GROUP BY, JOIN, CASE, tanggal, window, gabungan) dengan variasi soal
 
 ## Stack
 
@@ -61,15 +83,20 @@ berikutnya terbuka di peta.
 ## Struktur
 
 ```
-src/db/schema.ts         tabel SQLite (levels/exercises/progress)
-src/db/content.ts        kurikulum 10 level (dataset, soal, solusi)
+src/db/schema.ts         tabel SQLite (levels/exercises/progress) + materi
+src/db/content.ts        kurikulum bab 1 (level 1-10) + dataset
+src/db/content-extra.ts  bab lanjutan manual (level 11-44, 101-104) + dataset sekolah
+src/db/content-gen.ts    generator latihan terstruktur 9 topik (level 45-200)
 src/db/seed.ts           seed idempoten + isi schema_json (introspection)
 src/lib/introspect-dataset.ts   baca struktur tabel dari dataset via PGlite Node
 src/lib/pglite-runner.ts        PGlite browser: load dataset, run query, banding hasil
-src/components/LevelMap.tsx     peta petualangan (unlock logic ada di page)
-src/components/SchemaExplorer.tsx  panel "schema --database" collapsible
+src/components/LevelMap.tsx     peta petualangan di home (jalur hero di kiri)
+src/components/LevelSnakeMap.tsx  peta misi ular per level (compact utk rail kiri)
+src/components/LearningLayout.tsx layout 3 kolom + rail hide/unhide + kartu materi
+src/components/PagedExercises.tsx  soal 4/halaman + tombol kembali
+src/components/SchemaExplorer.tsx  panel data & skema (sticky, pagination data)
 src/components/SqlRunner.tsx    editor SQL + tombol + hasil + animasi sukses
-src/app/page.tsx                landing: header quest + level map + progress
+src/app/page.tsx                landing: header + level map + progress
 src/app/learn/[levelSlug]/      halaman latihan per level
 src/app/api/progress/           POST — catat exercise selesai
 scripts/verify-solutions.ts     verifikasi semua solusi valid di PGlite
@@ -87,10 +114,12 @@ scripts/verify-solutions.ts     verifikasi semua solusi valid di PGlite
 
 ## Menambah level/soal
 
-1. Edit `src/db/content.ts`: tambah `LevelSeed` (level + exercises) dengan
-   `datasetSql` berisi DDL+DML PostgreSQL valid.
-2. Hapus `data/learn.db`, jalankan `npm run db:setup` (schema_json otomatis diisi).
-3. Jalankan `npm run db:verify` untuk memastikan solusi & starter valid.
+1. Level bertema: tambah `LevelSeed2` di `src/db/content-extra.ts`.
+2. Level latihan massal: perbanyak topik di `src/db/content-gen.ts`.
+3. Hubungkan di `src/db/seed.ts` (array `allSeeds`), lalu jalankan `npm run db:seed`
+   (level baru masuk; yang sudah ada di-skip). Setiap level otomatis mendapat
+   `schema_json` hasil introspection dataset-nya.
+4. Jalankan `npm run db:verify` untuk memastikan solusi & starter valid.
 
 ## Deploy
 
