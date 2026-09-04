@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Silakan login dulu" }, { status: 401 });
   }
 
-  let body: { exerciseId?: number; attempts?: number; xp?: number };
+  let body: { exerciseId?: number; attempts?: number; xp?: number; durationMs?: number };
   try {
     body = await request.json();
   } catch {
@@ -22,13 +22,17 @@ export async function POST(request: Request) {
   const exerciseId = body.exerciseId;
   const attempts = typeof body.attempts === "number" ? body.attempts : 1;
   const xp = typeof body.xp === "number" ? body.xp : 10;
+  const durationMs =
+    typeof body.durationMs === "number" && body.durationMs > 0
+      ? Math.round(body.durationMs)
+      : null;
 
   if (!exerciseId || typeof exerciseId !== "number") {
     return NextResponse.json({ error: "exerciseId wajib diisi" }, { status: 400 });
   }
 
   const existing = db
-    .select({ id: progress.id })
+    .select({ id: progress.id, durationMs: progress.durationMs })
     .from(progress)
     .where(
       and(
@@ -39,10 +43,18 @@ export async function POST(request: Request) {
     .get();
 
   if (existing) {
+    // Simpan durasi TERBAIK (terkecil); data lama NULL dianggap tak terbatas
+    const bestDuration =
+      durationMs !== null &&
+      (existing.durationMs === null || durationMs < existing.durationMs)
+        ? durationMs
+        : existing.durationMs;
+
     db.update(progress)
       .set({
         attempts,
         xp,
+        durationMs: bestDuration,
         updatedAt: new Date(),
       })
       .where(eq(progress.id, existing.id))
@@ -55,6 +67,7 @@ export async function POST(request: Request) {
         status: "done",
         attempts,
         xp,
+        durationMs,
         updatedAt: new Date(),
       })
       .run();

@@ -10,6 +10,7 @@ import {
   RotateCcw,
   Rocket,
   Table2,
+  Timer,
   TriangleAlert,
   Zap,
 } from "lucide-react";
@@ -47,9 +48,34 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
   const [resultTable, setResultTable] = useState<RunResult | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [confettiBurst, setConfettiBurst] = useState(0);
+  // Timer: mulai saat Jalankan pertama, berhenti saat benar
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const [timerActive, setTimerActive] = useState(false);
+  const [penaltyPerWrong, setPenaltyPerWrong] = useState(0);
+  const startedAtRef = useRef<number | null>(null);
+  const wrongCountRef = useRef(0);
   const attemptsRef = useRef(0);
   const successRef = useRef(false);
   const runnerRef = useRef<Awaited<ReturnType<typeof createRunner>> | null>(null);
+
+  // Ambil setting penalti (detik per percobaan salah)
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((d) => setPenaltyPerWrong(Number(d?.penaltyPerWrong) || 0))
+      .catch(() => setPenaltyPerWrong(0));
+  }, []);
+
+  // Tick timer display
+  useEffect(() => {
+    if (!timerActive) return;
+    const iv = setInterval(() => {
+      if (startedAtRef.current !== null) {
+        setElapsedMs(Date.now() - startedAtRef.current);
+      }
+    }, 500);
+    return () => clearInterval(iv);
+  }, [timerActive]);
 
   const ensureRunner = useCallback(async () => {
     if (!runnerRef.current) {
@@ -65,13 +91,13 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
   }, []);
 
   const recordProgress = useCallback(
-    async (attempts: number) => {
+    async (attempts: number, durationMs?: number) => {
       if (!exerciseId) return;
       try {
         const res = await fetch("/api/progress", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ exerciseId, attempts, xp: 10 }),
+          body: JSON.stringify({ exerciseId, attempts, xp: 10, durationMs }),
         });
         if (res.status === 401) {
           // Belum login — arahkan untuk masuk supaya progres tersimpan
@@ -89,6 +115,12 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
     setStatus({ kind: "running" });
     try {
       const runner = await ensureRunner();
+      // Timer mulai saat percobaan pertama (klik Jalankan)
+      if (startedAtRef.current === null) {
+        startedAtRef.current = Date.now();
+        setElapsedMs(0);
+        setTimerActive(true);
+      }
       attemptsRef.current += 1;
 
       const userOutcome: QueryOutcome = await runner.run(code);
@@ -115,16 +147,24 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
       const ok = compareResults(userResult, solutionOutcome.result);
       if (ok) {
         successRef.current = true;
+        // Hentikan timer & hitung durasi (ms) + penalti
+        setTimerActive(false);
+        const durationMs =
+          startedAtRef.current !== null
+            ? Date.now() - startedAtRef.current + wrongCountRef.current * penaltyPerWrong * 1000
+            : undefined;
+        setElapsedMs(durationMs ?? 0);
         setResultTable(userOutcome.result);
         setStatus({ kind: "success", result: userOutcome.result, attempts: attemptsRef.current });
         setConfettiBurst((n) => n + 1);
-        void recordProgress(attemptsRef.current);
+        void recordProgress(attemptsRef.current, durationMs);
         if (exerciseId) {
           window.dispatchEvent(
             new CustomEvent("sqlquest:exercise-done", { detail: { exerciseId } })
           );
         }
       } else {
+        wrongCountRef.current += 1;
         setResultTable(userOutcome.result);
         setStatus({ kind: "mismatch", userResult: userOutcome.result ?? { columns: [], rows: [], rowCount: 0, timeMs: 0 }, solutionResult: solutionOutcome.result, attempts: attemptsRef.current });
       }
@@ -138,12 +178,24 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
     setStatus({ kind: "idle" });
     setResultTable(null);
     attemptsRef.current = 0;
+    wrongCountRef.current = 0;
+    startedAtRef.current = null;
+    setElapsedMs(0);
+    setTimerActive(false);
     void runnerRef.current?.close();
     runnerRef.current = null;
     setShowHint(false);
   };
 
   const showResult = status.kind === "success" || status.kind === "mismatch";
+
+  // Format mm:ss dari ms
+  const fmt = (ms: number) => {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -172,6 +224,23 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
 
       {/* Aksi */}
       <div className="flex flex-wrap items-center gap-2">
+        {/* Timer */}
+        {(timerActive || elapsedMs > 0) && (
+          <span
+            className={`flex items-center gap-1.5 rounded-full px-3 py-2 font-mono text-sm font-extrabold ${
+              successRef.current
+                ? "bg-mint-soft text-[#047857]"
+                : "bg-lav/70 text-grape"
+            }`}
+          >
+            <Timer className="h-4 w-4" /> {fmt(elapsedMs)}
+            {successRef.current && wrongCountRef.current > 0 && penaltyPerWrong > 0 && (
+              <span className="text-[10px] font-bold text-[#047857]/70">
+                (+{wrongCountRef.current * penaltyPerWrong}s penalti)
+              </span>
+            )}
+          </span>
+        )}
         <button
           onClick={runQuery}
           disabled={status.kind === "running" || successRef.current}

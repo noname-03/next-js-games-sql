@@ -44,7 +44,14 @@ export const progress = sqliteTable("progress", {
   status: text("status", { enum: ["done"] }).notNull(),
   attempts: integer("attempts").notNull().default(0),
   xp: integer("xp").notNull().default(0),
+  // Durasi terbaik (ms) sampai jawaban benar — dipakai leaderboard kecepatan
+  durationMs: integer("duration_ms"),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+export const settings = sqliteTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
 });
 
 export type Level = typeof levels.$inferSelect;
