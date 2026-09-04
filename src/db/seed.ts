@@ -1,5 +1,6 @@
 import { sqlite } from "./client";
 import { DATASET_FULL, DATASET_STUDENTS, levelSeeds } from "./content";
+import { DATASET_SCHOOL, extraLevelsA } from "./content-extra";
 import { introspectDataset } from "../lib/introspect-dataset";
 import type { DatasetSchema } from "../lib/introspect-dataset";
 
@@ -10,11 +11,11 @@ import type { DatasetSchema } from "../lib/introspect-dataset";
 //
 // levels.schema_json diisi hasil introspection dataset level tsb (struktur tabel,
 // kolom, PK/FK, contoh data) — dipakai panel "Skema Database" di halaman latihan.
+// levels.concept + explanation = materi/istilah baru tiap level.
 
 async function main() {
   console.log("Seeding database...");
 
-  // Introspect tiap varian dataset sekali (hemat karena PGlite dijalankan di Node)
   const schemaCache = new Map<string, DatasetSchema>();
   const getSchema = async (datasetSql: string): Promise<string | null> => {
     if (!schemaCache.has(datasetSql)) {
@@ -31,11 +32,21 @@ async function main() {
     return schema.tables.length > 0 ? JSON.stringify(schema) : null;
   };
 
-  // Panaskan cache: dataset yang dipakai level
   await getSchema(DATASET_STUDENTS);
   await getSchema(DATASET_FULL);
+  await getSchema(DATASET_SCHOOL);
 
-  for (const seed of levelSeeds) {
+  // Gabungkan semua sumber level
+  const allSeeds = [...levelSeeds, ...extraLevelsA];
+
+  const insertLevel = sqlite.prepare(
+    "INSERT INTO levels (slug, title, description, order_index, schema_json, concept, explanation) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  );
+  const insertExercise = sqlite.prepare(
+    "INSERT INTO exercises (level_id, title, prompt, hint, dataset_sql, starter_sql, solution_sql, order_index) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+  );
+
+  for (const seed of allSeeds) {
     const existing = sqlite
       .prepare("SELECT id FROM levels WHERE slug = ?")
       .get(seed.level.slug);
@@ -46,25 +57,21 @@ async function main() {
     }
 
     const schemaJson = await getSchema(seed.exercises[0]?.datasetSql ?? "");
+    const lv = seed.level;
 
     const levelId = Number(
-      sqlite
-        .prepare(
-          "INSERT INTO levels (slug, title, description, order_index, schema_json) VALUES (?, ?, ?, ?, ?)"
-        )
-        .run(
-          seed.level.slug,
-          seed.level.title,
-          seed.level.description,
-          seed.level.orderIndex,
-          schemaJson
-        ).lastInsertRowid
+      insertLevel.run(
+        lv.slug,
+        lv.title,
+        lv.description,
+        lv.orderIndex,
+        schemaJson,
+        lv.concept ?? null,
+        lv.explanation ?? null
+      ).lastInsertRowid
     );
 
     let order = 1;
-    const insertExercise = sqlite.prepare(
-      "INSERT INTO exercises (level_id, title, prompt, hint, dataset_sql, starter_sql, solution_sql, order_index) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-    );
     for (const ex of seed.exercises) {
       insertExercise.run(
         levelId,
@@ -78,7 +85,8 @@ async function main() {
       );
     }
     console.log(
-      `  Level "${seed.level.title}" -> ${seed.exercises.length} exercise`
+      `  Level "${lv.title}" -> ${seed.exercises.length} exercise` +
+        (lv.concept ? ` [materi: ${lv.concept}]` : "")
     );
   }
 

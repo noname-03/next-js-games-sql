@@ -7,6 +7,9 @@ export const levels = sqliteTable("levels", {
   description: text("description").notNull(),
   orderIndex: integer("order_index").notNull(),
   schemaJson: text("schema_json"),
+  // Materi level: istilah/konsep baru + penjelasan singkat (ditampilkan sebelum soal)
+  concept: text("concept"),
+  explanation: text("explanation"),
 });
 
 export const exercises = sqliteTable("exercises", {

@@ -68,6 +68,8 @@ export default async function LearnLevelPage({
         description: level.description,
         slug: level.slug,
       }}
+      concept={level.concept}
+      explanation={level.explanation}
       exercises={snakeExercises}
       completedIds={[...completedIds]}
       allDone={allDone}

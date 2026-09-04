@@ -19,8 +19,14 @@ export type SeedExercise = {
   solutionSql: string;
 };
 
+// Level membawa materi: konsep/istilah baru + penjelasan singkat (ramah anak SMP).
+// Ditampilkan sebagai kartu "Materi" SEBELUM soal pertama — istilah baru selalu
+// dijelaskan dulu sebelum diminta dipakai.
 export type LevelSeed = {
-  level: NewLevel;
+  level: NewLevel & {
+    concept?: string | null;
+    explanation?: string | null;
+  };
   exercises: SeedExercise[];
 };
 

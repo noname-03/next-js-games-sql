@@ -3,9 +3,11 @@
 import { useState } from "react";
 import {
   ArrowLeft,
+  BookOpen,
   Check,
   Database,
   Flag,
+  Lightbulb,
   Map,
   PanelLeftClose,
   PanelLeftOpen,
@@ -29,6 +31,8 @@ type LearningLayoutProps = {
     description: string;
     slug: string;
   };
+  concept?: string | null;
+  explanation?: string | null;
   exercises: LearnExercise[];
   completedIds: number[];
   allDone: boolean;
@@ -38,6 +42,8 @@ type LearningLayoutProps = {
 
 export default function LearningLayout({
   level,
+  concept,
+  explanation,
   exercises,
   completedIds,
   allDone,
@@ -182,6 +188,24 @@ export default function LearningLayout({
               </Link>
             )}
           </div>
+
+          {/* Kartu materi: istilah baru dijelaskan DULU sebelum soal */}
+          {concept && explanation && (
+            <div className="mb-5 overflow-hidden rounded-[1.75rem] border-2 border-sun/50 bg-gradient-to-br from-sun/10 via-white to-pink/5 shadow-sm">
+              <div className="flex items-center gap-2 border-b-2 border-sun/30 bg-sun/15 px-5 py-3">
+                <Lightbulb className="h-5 w-5 text-peach" />
+                <h2 className="font-display text-base font-extrabold text-ink">
+                  Materi: {concept}
+                </h2>
+              </div>
+              <div className="px-5 py-4">
+                <p className="flex items-start gap-2 text-sm font-semibold leading-relaxed text-ink">
+                  <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-grape" />
+                  <span className="whitespace-pre-wrap">{explanation}</span>
+                </p>
+              </div>
+            </div>
+          )}
 
           {children}
         </main>
