@@ -887,3 +887,155 @@ export const extraLevelsD: LevelSeed2[] = [
     ],
   },
 ];
+
+// ============================================================
+// BAB E — WINDOW FUNCTIONS (level 33-38)
+// ============================================================
+export const extraLevelsE: LevelSeed2[] = [
+  {
+    level: {
+      slug: "window-row-number",
+      title: "Level 33 — ROW_NUMBER (Nomor Urut)",
+      description: "Beri nomor urut tiap baris dengan ROW_NUMBER.",
+      orderIndex: 33,
+      concept: "ROW_NUMBER",
+      explanation:
+        "ROW_NUMBER() memberi nomor urut 1,2,3,... pada tiap baris dalam 'jendela' (window).\n\nBentuk:\nROW_NUMBER() OVER (ORDER BY kolom)\n\nContoh — urutkan siswa dari gpa tertinggi lalu beri nomor:\nSELECT name, gpa,\n  ROW_NUMBER() OVER (ORDER BY gpa DESC) AS peringkat\nFROM students;\n\nBerbeda dari LIMIT: SEMUA baris tetap muncul, hanya diberi nomor.",
+    },
+    exercises: [
+      {
+        title: "Nomori Semua Siswa",
+        prompt: "Tampilkan name, gpa, dan ROW_NUMBER() urut gpa tertinggi dulu (alias peringkat).",
+        hint: "ROW_NUMBER() OVER (ORDER BY gpa DESC)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, gpa FROM students;",
+        solutionSql:
+          "SELECT name, gpa, ROW_NUMBER() OVER (ORDER BY gpa DESC) AS peringkat FROM students;",
+      },
+      {
+        title: "Peringkat per Kelas",
+        prompt: "Tampilkan name, class_name, gpa, dan ROW_NUMBER() per kelas (PARTITION BY class_name) urut gpa DESC.",
+        hint: "ROW_NUMBER() OVER (PARTITION BY class_name ORDER BY gpa DESC)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT name, class_name, gpa FROM students;",
+        solutionSql:
+          "SELECT name, class_name, gpa, ROW_NUMBER() OVER (PARTITION BY class_name ORDER BY gpa DESC) FROM students;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "window-rank",
+      title: "Level 34 — RANK & DENSE_RANK",
+      description: "Peringkat dengan nilai sama (RANK) vs nomor urut (ROW_NUMBER).",
+      orderIndex: 34,
+      concept: "RANK",
+      explanation:
+        "RANK() mirip ROW_NUMBER tapi nilai yang SAMA mendapat peringkat sama, lalu nomor berikutnya 'melompat'.\nContoh nilai 90,90,80 → RANK: 1,1,3.\nDENSE_RANK: 1,1,2 (tanpa lompat).\n\nCoba:\nSELECT score, RANK() OVER (ORDER BY score DESC),\n  DENSE_RANK() OVER (ORDER BY score DESC)\nFROM exam_scores;",
+    },
+    exercises: [
+      {
+        title: "Rank Nilai Ujian",
+        prompt: "Tampilkan student_id, score, dan RANK() urut score DESC dari exam_scores.",
+        hint: "RANK() OVER (ORDER BY score DESC)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT student_id, score FROM exam_scores;",
+        solutionSql:
+          "SELECT student_id, score, RANK() OVER (ORDER BY score DESC) FROM exam_scores;",
+      },
+      {
+        title: "Dense Rank",
+        prompt: "Tampilkan subject_id, score, dan DENSE_RANK() per subject (PARTITION BY subject_id) urut score DESC.",
+        hint: "DENSE_RANK() OVER (PARTITION BY subject_id ORDER BY score DESC)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT subject_id, score FROM exam_scores;",
+        solutionSql:
+          "SELECT subject_id, score, DENSE_RANK() OVER (PARTITION BY subject_id ORDER BY score DESC) FROM exam_scores;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "window-sum-avg",
+      title: "Level 35 — Window SUM & AVG (Total Berjalan)",
+      description: "Hitung total/rata-rata berjalan dengan SUM/AVG + OVER.",
+      orderIndex: 35,
+      concept: "Window SUM/AVG",
+      explanation:
+        "Agregat biasa (SUM/AVG) dengan OVER menghitung per baris tanpa menggabungkan baris.\n\nSUM(score) OVER (ORDER BY exam_date) = total kumulatif sampai baris itu.\nAVG(score) OVER (PARTITION BY subject_id) = rata-rata per mapel, diulang di tiap baris mapel itu.\n\nCoba:\nSELECT exam_date, score, SUM(score) OVER (ORDER BY exam_date)\nFROM exam_scores;",
+    },
+    exercises: [
+      {
+        title: "Total Kumulatif",
+        prompt: "Tampilkan exam_date, score, dan SUM(score) OVER (ORDER BY exam_date) sebagai total_berjalan.",
+        hint: "SUM(score) OVER (ORDER BY exam_date)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT exam_date, score FROM exam_scores;",
+        solutionSql:
+          "SELECT exam_date, score, SUM(score) OVER (ORDER BY exam_date) AS total_berjalan FROM exam_scores;",
+      },
+      {
+        title: "Rata-rata per Mapel",
+        prompt: "Tampilkan student_id, subject_id, score, dan AVG(score) OVER (PARTITION BY subject_id).",
+        hint: "AVG(score) OVER (PARTITION BY subject_id)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT student_id, subject_id, score FROM exam_scores;",
+        solutionSql:
+          "SELECT student_id, subject_id, score, AVG(score) OVER (PARTITION BY subject_id) FROM exam_scores;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "window-lag",
+      title: "Level 36 — LAG & LEAD",
+      description: "Lihat nilai baris sebelumnya (LAG) atau berikutnya (LEAD).",
+      orderIndex: 36,
+      concept: "LAG & LEAD",
+      explanation:
+        "LAG(kolom) mengambil nilai dari baris SEBELUMNYA dalam urutan.\nLEAD(kolom) mengambil nilai baris BERIKUTNYA.\n\nContoh — bandingkan score dengan ujian sebelumnya:\nSELECT exam_date, score,\n  LAG(score) OVER (ORDER BY exam_date) AS score_sebelumnya\nFROM exam_scores;\n\nBaris pertama LAG-nya NULL (tidak ada sebelumnya).",
+    },
+    exercises: [
+      {
+        title: "Score Sebelumnya",
+        prompt: "Tampilkan exam_date, score, dan LAG(score) OVER (ORDER BY exam_date) dari exam_scores.",
+        hint: "LAG(score) OVER (ORDER BY exam_date)",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT exam_date, score FROM exam_scores;",
+        solutionSql:
+          "SELECT exam_date, score, LAG(score) OVER (ORDER BY exam_date) FROM exam_scores;",
+      },
+    ],
+  },
+  {
+    level: {
+      slug: "window-boss",
+      title: "Level 37 — BOSS: Window Functions",
+      description: "Tantangan menggabungkan window functions.",
+      orderIndex: 37,
+      concept: "Ulasan Window Functions",
+      explanation:
+        "Window functions = hitung per baris tanpa menggabungkan:\n• ROW_NUMBER() OVER (ORDER BY ...)\n• RANK() / DENSE_RANK()\n• PARTITION BY untuk kelompok\n• SUM/AVG OVER untuk total/rata-rata berjalan\n• LAG/LEAD lihat baris tetangga\n\nCoba kombinasi di soal!",
+    },
+    exercises: [
+      {
+        title: "Top 3 per Mapel (Boss)",
+        prompt: "Tampilkan student_id, subject_id, score dari 3 nilai tertinggi tiap subject (pakai subquery + ROW_NUMBER).",
+        hint: "SELECT * FROM (SELECT student_id, subject_id, score, ROW_NUMBER() OVER (PARTITION BY subject_id ORDER BY score DESC) rn FROM exam_scores) t WHERE rn <= 3;",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT student_id, subject_id, score FROM exam_scores;",
+        solutionSql:
+          "SELECT student_id, subject_id, score FROM (SELECT student_id, subject_id, score, ROW_NUMBER() OVER (PARTITION BY subject_id ORDER BY score DESC) AS rn FROM exam_scores) t WHERE rn <= 3;",
+      },
+      {
+        title: "Rata-rata & Selisih (Boss)",
+        prompt: "Tampilkan student_id, score, AVG(score) OVER () sebagai rata_semua, dan score - rata_semua sebagai selisih.",
+        hint: "AVG(score) OVER () — tanpa PARTITION = seluruh tabel",
+        datasetSql: DATASET_SCHOOL,
+        starterSql: "SELECT student_id, score FROM exam_scores;",
+        solutionSql:
+          "SELECT student_id, score, AVG(score) OVER () AS rata_semua, score - AVG(score) OVER () AS selisih FROM exam_scores;",
+      },
+    ],
+  },
+];
