@@ -222,17 +222,17 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         </div>
       </header>
 
+      {/* Papan juara akumulasi — di atas supaya terlihat langsung, tanpa scroll */}
+      {activeChapter === null && (
+        <Leaderboard />
+      )}
+
       <ChapterBrowser
         chapters={chapterMetas}
         activeChapter={babTerbuka ? activeChapter : null}
         nodes={activeNodes}
         activeDone={activeDone}
       />
-
-      {/* Papan juara akumulasi — hanya di mode daftar bab */}
-      {activeChapter === null && (
-        <Leaderboard />
-      )}
 
       {activeChapter !== null && !babTerbuka && (
         <p className="-mt-3 text-center text-sm font-bold text-ink-faint">

@@ -74,12 +74,12 @@ export default function ChapterBrowser({
           pilih level untuk mulai
         </p>
 
-        <LevelMap nodes={nodes} />
-
-        {/* Papan juara bab ini */}
-        <div className="mt-2 w-full max-w-md">
+        {/* Papan juara bab ini — di atas supaya terlihat langsung */}
+        <div className="w-full max-w-md">
           <Leaderboard bab={activeChapter} />
         </div>
+
+        <LevelMap nodes={nodes} />
 
         {activeDone && activeChapter < totalChapters && (
           <button
