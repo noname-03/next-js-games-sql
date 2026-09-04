@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Database, Loader2, UserPlus } from "lucide-react";
+import { notifyAuthChanged } from "@/components/UserBadge";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function RegisterPage() {
         setLoading(false);
         return;
       }
+      notifyAuthChanged();
       router.push("/");
       router.refresh();
     } catch {

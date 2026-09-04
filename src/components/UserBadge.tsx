@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogIn, LogOut, ShieldCheck, User as UserIcon } from "lucide-react";
@@ -12,24 +12,41 @@ type SessionUser = {
   role: "admin" | "user";
 };
 
+/** Nama event global: dipakai login/register/logout untuk memberi tahu UserBadge */
+export const AUTH_CHANGED_EVENT = "sqlquest:auth-changed";
+
+export function notifyAuthChanged() {
+  window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
+}
+
 export default function UserBadge() {
   const router = useRouter();
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((d) => {
-        setUser(d.user ?? null);
-        setLoaded(true);
-      })
-      .catch(() => setLoaded(true));
+  const refresh = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      const d = await res.json();
+      setUser(d.user ?? null);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoaded(true);
+    }
   }, []);
+
+  useEffect(() => {
+    refresh();
+    // Perbarui badge tiap kali auth berubah (login/register/logout di tab ini)
+    window.addEventListener(AUTH_CHANGED_EVENT, refresh);
+    return () => window.removeEventListener(AUTH_CHANGED_EVENT, refresh);
+  }, [refresh]);
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     setUser(null);
+    notifyAuthChanged();
     router.push("/");
     router.refresh();
   };

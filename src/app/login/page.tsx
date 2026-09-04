@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Database, Loader2, LogIn } from "lucide-react";
+import { notifyAuthChanged } from "@/components/UserBadge";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
+      notifyAuthChanged();
       router.push(data.user?.role === "admin" ? "/admin" : "/");
       router.refresh();
     } catch {
