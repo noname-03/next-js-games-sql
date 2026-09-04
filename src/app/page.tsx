@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { BookOpen, Database, Heart, Map, Sparkles, Trophy, Zap } from "lucide-react";
 import { db } from "@/db/client";
 import { exercises, levels, progress } from "@/db/schema";
 import LevelMap from "@/components/LevelMap";
@@ -62,30 +63,30 @@ export default async function Home() {
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-8 p-6">
       {/* Header ceria */}
       <header className="mt-2 flex flex-col items-center gap-3 text-center">
-        <div className="flex items-end gap-2 text-5xl">
-          <span className="animate-bob inline-block">🐣</span>
-          <span className="animate-bob inline-block" style={{ animationDelay: "0.15s" }}>⚡</span>
-          <span className="animate-bob inline-block" style={{ animationDelay: "0.3s" }}>🐘</span>
+        <div className="flex items-center gap-3 text-grape">
+          <Sparkles className="animate-bob h-7 w-7 text-sun" />
+          <Database className="animate-bob h-8 w-8 text-grape" style={{ animationDelay: "0.15s" }} />
+          <Zap className="animate-bob h-7 w-7 text-peach" style={{ animationDelay: "0.3s" }} />
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight text-grape">
           SQL Quest
         </h1>
         <p className="max-w-md text-base font-semibold text-ink-soft">
           Petualangan seru belajar SQL! Selesaikan misi, kumpulkan XP, dan jadilah
-          master database. 🚀
+          master database.
         </p>
 
         {/* Statistik */}
         <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
-          <span className="rounded-full bg-white px-4 py-1.5 text-sm font-extrabold text-grape shadow-sm ring-1 ring-lilac">
-            📚 {totalDone}/{totalCount} soal
+          <span className="flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-sm font-extrabold text-grape shadow-sm ring-1 ring-lilac">
+            <BookOpen className="h-4 w-4" /> {totalDone}/{totalCount} soal
           </span>
-          <span className="rounded-full bg-white px-4 py-1.5 text-sm font-extrabold text-peach shadow-sm ring-1 ring-lilac">
-            ⚡ {totalXp} XP
+          <span className="flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-sm font-extrabold text-peach shadow-sm ring-1 ring-lilac">
+            <Zap className="h-4 w-4" /> {totalXp} XP
           </span>
           {allDone && (
-            <span className="rounded-full bg-mint-soft px-4 py-1.5 text-sm font-extrabold text-mint">
-              🏆 semua level ditaklukkan!
+            <span className="flex items-center gap-1.5 rounded-full bg-mint-soft px-4 py-1.5 text-sm font-extrabold text-mint">
+              <Trophy className="h-4 w-4" /> Semua level ditaklukkan!
             </span>
           )}
         </div>
@@ -103,8 +104,8 @@ export default async function Home() {
 
       {/* Peta petualangan */}
       <section className="flex flex-col items-center gap-3 rounded-[2rem] bg-white/70 p-6 shadow-sm ring-1 ring-lilac backdrop-blur">
-        <h2 className="w-full text-center text-xl font-extrabold text-grape">
-          🗺️ Peta Petualanganmu
+        <h2 className="flex items-center gap-2 text-center text-xl font-extrabold text-grape">
+          <Map className="h-5 w-5" /> Peta Petualanganmu
         </h2>
         <p className="text-center text-sm font-semibold text-ink-soft">
           Ikuti jalurnya, selesaikan tiap level, dan lihat karaktermu melaju!
@@ -112,8 +113,9 @@ export default async function Home() {
         <LevelMap nodes={mapNodes} />
       </section>
 
-      <footer className="pb-6 text-center text-sm font-bold text-ink-faint">
-        dibuat dengan 💜 untuk para calon master database
+      <footer className="flex items-center justify-center gap-1.5 pb-6 text-sm font-bold text-ink-faint">
+        Dibuat dengan <Heart className="h-4 w-4 fill-rose text-rose" /> untuk para calon
+        master database
       </footer>
     </main>
   );

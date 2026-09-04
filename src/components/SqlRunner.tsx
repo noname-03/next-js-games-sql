@@ -1,6 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Lightbulb,
+  Loader2,
+  PenLine,
+  RotateCcw,
+  Rocket,
+  Table2,
+  TriangleAlert,
+  Zap,
+} from "lucide-react";
 import { createRunner, compareResults } from "@/lib/pglite-runner";
 import type { RunQueryFn, QueryOutcome, RunResult } from "@/lib/pglite-runner";
 
@@ -134,8 +146,8 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
       {/* Editor SQL */}
       <div className="overflow-hidden rounded-2xl border-2 border-lilac bg-white shadow-sm">
         <div className="flex items-center justify-between border-b-2 border-lilac/60 bg-lav/50 px-3 py-2">
-          <span className="font-display text-xs font-extrabold text-ink-soft">
-            ✍️ Tulis query-mu di sini (PostgreSQL)
+          <span className="flex items-center gap-1.5 font-display text-xs font-extrabold text-ink-soft">
+            <PenLine className="h-3.5 w-3.5" /> Tulis query-mu di sini (PostgreSQL)
           </span>
           <span className="flex gap-1.5">
             <span className="h-3 w-3 rounded-full bg-rose/80" />
@@ -159,31 +171,40 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
         <button
           onClick={runQuery}
           disabled={status.kind === "running" || successRef.current}
-          className={`rounded-full px-6 py-2.5 font-display text-sm font-extrabold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`flex items-center gap-2 rounded-full px-6 py-2.5 font-display text-sm font-extrabold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 ${
             status.kind === "running" ? "bg-ink-soft" : "animate-pulse-glow bg-grape"
           }`}
         >
-          {status.kind === "running" ? "⏳ Menjalankan..." : "🚀 Jalankan"}
+          {status.kind === "running" ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> Menjalankan...
+            </>
+          ) : (
+            <>
+              <Rocket className="h-4 w-4" /> Jalankan
+            </>
+          )}
         </button>
         <button
           onClick={reset}
-          className="rounded-full border-2 border-lilac bg-white px-5 py-2.5 font-display text-sm font-extrabold text-ink-soft transition hover:border-rose/40 hover:text-rose"
+          className="flex items-center gap-1.5 rounded-full border-2 border-lilac bg-white px-5 py-2.5 font-display text-sm font-extrabold text-ink-soft transition hover:border-rose/40 hover:text-rose"
         >
-          ↺ Reset
+          <RotateCcw className="h-4 w-4" /> Reset
         </button>
         <button
           onClick={() => setShowHint((v) => !v)}
-          className="rounded-full border-2 border-lilac bg-white px-5 py-2.5 font-display text-sm font-extrabold text-ink-soft transition hover:border-sun/60 hover:text-peach"
+          className="flex items-center gap-1.5 rounded-full border-2 border-lilac bg-white px-5 py-2.5 font-display text-sm font-extrabold text-ink-soft transition hover:border-sun/60 hover:text-peach"
         >
-          {showHint ? "🙈 Sembunyikan Hint" : "💡 Lihat Hint"}
+          <Lightbulb className="h-4 w-4" />
+          {showHint ? "Sembunyikan Hint" : "Lihat Hint"}
         </button>
       </div>
 
       {/* Hint */}
       {showHint && (
         <div className="animate-pop-in rounded-2xl border-2 border-dashed border-sun bg-sun/10 p-3">
-          <span className="mb-1 block font-display text-xs font-extrabold text-peach">
-            💡 Petunjuk — coba query seperti ini:
+          <span className="mb-1 flex items-center gap-1.5 font-display text-xs font-extrabold text-peach">
+            <Lightbulb className="h-3.5 w-3.5" /> Petunjuk — coba query seperti ini:
           </span>
           <code className="whitespace-pre-wrap font-mono text-xs text-ink">{solutionSql}</code>
         </div>
@@ -193,9 +214,10 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
       {status.kind === "error" && (
         <div
           role="alert"
-          className="animate-pop-in rounded-2xl border-2 border-rose/40 bg-rose/10 p-3 font-sans text-sm font-bold text-[#be123c]"
+          className="animate-pop-in flex items-start gap-2 rounded-2xl border-2 border-rose/40 bg-rose/10 p-3 font-sans text-sm font-bold text-[#be123c]"
         >
-          😅 Ups, error! {status.message}
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>Ups, error! {status.message}</span>
         </div>
       )}
 
@@ -204,7 +226,7 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
         <div className="flex flex-col gap-2">
           <div
             role="status"
-            className="animate-pop-in relative overflow-visible rounded-2xl border-2 border-mint bg-mint-soft p-4 font-display text-base font-extrabold text-[#047857]"
+            className="animate-pop-in relative overflow-visible rounded-2xl border-2 border-mint bg-mint-soft p-4"
           >
             {confettiBurst > 0 && (
               <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-2 h-40">
@@ -224,17 +246,22 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
                 ))}
               </div>
             )}
-            <span>🎉 BENAR! Query-mu cocok dengan solusi.</span>
-            {status.result && (
-              <span className="mt-1 block font-sans text-sm font-bold text-[#047857]/80">
-                {status.result.rowCount} baris · {status.result.timeMs} ms · percobaan ke-
-                {status.attempts}
-              </span>
-            )}
+            <div className="flex items-start gap-2 font-display text-base font-extrabold text-[#047857]">
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
+              <div>
+                <div>BENAR! Query-mu cocok dengan solusi.</div>
+                {status.result && (
+                  <div className="mt-1 font-sans text-sm font-bold text-[#047857]/80">
+                    {status.result.rowCount} baris · {status.result.timeMs} ms · percobaan ke-
+                    {status.attempts}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           <div className="pointer-events-none relative h-0">
-            <span className="animate-float-up absolute right-4 top-0 font-display text-xl font-extrabold text-peach drop-shadow-sm">
-              +10 XP ⚡
+            <span className="animate-float-up absolute right-4 top-0 flex items-center gap-1 font-display text-xl font-extrabold text-peach drop-shadow-sm">
+              <Zap className="h-5 w-5 fill-peach" /> +10 XP
             </span>
           </div>
         </div>
@@ -244,17 +271,18 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
       {status.kind === "mismatch" && (
         <div
           role="status"
-          className="animate-pop-in rounded-2xl border-2 border-peach/50 bg-peach/10 p-3 font-sans text-sm font-bold text-[#c2410c]"
+          className="animate-pop-in flex items-start gap-2 rounded-2xl border-2 border-peach/50 bg-peach/10 p-3 font-sans text-sm font-bold text-[#c2410c]"
         >
-          🤔 Belum tepat — hasil query-mu belum sama dengan solusi. Coba lagi, kamu pasti bisa!
+          <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>Belum tepat — hasil query-mu belum sama dengan solusi. Coba lagi, kamu pasti bisa!</span>
         </div>
       )}
 
       {/* Tabel hasil */}
       {showResult && resultTable && (
         <div className="animate-pop-in overflow-hidden rounded-2xl border-2 border-lilac bg-white">
-          <div className="border-b-2 border-lilac/60 bg-lav/50 px-3 py-2 font-display text-xs font-extrabold text-ink-soft">
-            📊 Hasil query ({resultTable.rowCount} baris)
+          <div className="flex items-center gap-1.5 border-b-2 border-lilac/60 bg-lav/50 px-3 py-2 font-display text-xs font-extrabold text-ink-soft">
+            <Table2 className="h-3.5 w-3.5" /> Hasil query ({resultTable.rowCount} baris)
           </div>
           <div className="overflow-x-auto">
             <table className="w-full font-mono text-sm">

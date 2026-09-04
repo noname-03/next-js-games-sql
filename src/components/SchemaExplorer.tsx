@@ -1,6 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import {
+  ChevronRight,
+  Database,
+  Eye,
+  Info,
+  KeyRound,
+  Table2,
+} from "lucide-react";
 import type { DatasetSchema } from "@/lib/introspect-dataset";
 
 type SchemaExplorerProps = {
@@ -43,12 +51,10 @@ export default function SchemaExplorer({ schemaJson }: SchemaExplorerProps) {
         aria-expanded={open}
       >
         <span className="flex items-center gap-2 font-display text-base font-extrabold text-grape">
-          <span
-            className={`text-sm transition-transform ${open ? "rotate-90" : ""}`}
-          >
-            ▶
-          </span>
-          <span className="text-lg">🗄️</span> Lihat Data Tabel (Skema Database)
+          <ChevronRight
+            className={`text-grape transition-transform ${open ? "rotate-90" : ""}`}
+          />
+          <Database className="h-5 w-5" /> Lihat Data Tabel (Skema Database)
         </span>
         <span className="rounded-full bg-lav px-3 py-1 text-xs font-extrabold text-ink-soft">
           {tableCount > 0 ? `${tableCount} tabel` : "kosong"}
@@ -57,18 +63,23 @@ export default function SchemaExplorer({ schemaJson }: SchemaExplorerProps) {
 
       {open && schema && (
         <div className="flex flex-col gap-5 border-t-2 border-lilac/60 px-5 py-5">
-          <p className="rounded-2xl bg-sky/10 p-3 text-xs font-bold leading-relaxed text-ink-soft">
-            💡 Ini tabel yang bisa kamu pakai di level ini. Lihat kolom{" "}
-            <span className="text-[#b45309]">🔑 PK</span> (kunci utama) dan{" "}
-            <span className="text-[#0369a1]">FK</span> (kunci tamu) untuk tahu cara
-            menyambung tabel saat JOIN!
+          <p className="flex items-start gap-2 rounded-2xl bg-sky/10 p-3 text-xs font-bold leading-relaxed text-ink-soft">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-sky" />
+            <span>
+              Ini tabel yang bisa kamu pakai di level ini. Lihat kolom{" "}
+              <span className="inline-flex items-center gap-0.5 text-[#b45309]">
+                <KeyRound className="h-3 w-3" /> PK
+              </span>{" "}
+              (kunci utama) dan FK (kunci tamu) untuk tahu cara menyambung tabel saat
+              JOIN!
+            </span>
           </p>
 
           {schema.tables.map((table) => (
             <div key={table.name} className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="rounded-lg bg-grape/10 px-2.5 py-1 font-mono text-sm font-extrabold text-grape">
-                  📋 {table.name}
+                <span className="flex items-center gap-1.5 rounded-lg bg-grape/10 px-2.5 py-1 font-mono text-sm font-extrabold text-grape">
+                  <Table2 className="h-4 w-4" /> {table.name}
                 </span>
               </div>
 
@@ -90,7 +101,9 @@ export default function SchemaExplorer({ schemaJson }: SchemaExplorerProps) {
                         }`}
                       >
                         <td className="px-3 py-2 font-bold text-ink">
-                          {col.isPk && <span className="mr-1">🔑</span>}
+                          {col.isPk && (
+                            <KeyRound className="mr-1 inline h-3.5 w-3.5 text-[#b45309]" />
+                          )}
                           {col.name}
                         </td>
                         <td className="px-3 py-2 text-grape">{col.type}</td>
@@ -109,8 +122,8 @@ export default function SchemaExplorer({ schemaJson }: SchemaExplorerProps) {
 
               {table.sampleRows.length > 0 && (
                 <div className="overflow-hidden rounded-2xl border-2 border-dashed border-lilac bg-lav/20">
-                  <div className="bg-lilac/40 px-3 py-1.5 font-display text-[11px] font-extrabold uppercase tracking-wide text-ink-soft">
-                    👀 Contoh isi data (beberapa baris)
+                  <div className="flex items-center gap-1.5 bg-lilac/40 px-3 py-1.5 font-display text-[11px] font-extrabold uppercase tracking-wide text-ink-soft">
+                    <Eye className="h-3.5 w-3.5" /> Contoh isi data (beberapa baris)
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full font-mono text-xs">

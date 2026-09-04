@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Check, Flag, PersonStanding } from "lucide-react";
 
 export type SnakeExercise = {
   id: number;
@@ -175,13 +176,13 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
             }}
           >
             <div className="-translate-x-1/2 -translate-y-1/2">
-              <span
-                className="block text-[30px] leading-none drop-shadow-[0_4px_8px_rgba(124,58,237,0.35)]"
+              <div
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-grape to-pink text-white shadow-lg ring-4 ring-white/80"
                 style={{ animation: "bob 2.2s ease-in-out infinite" }}
               >
-                🐣
-              </span>
-              <div className="mx-auto mt-0.5 h-1.5 w-5 rounded-full bg-ink/15" />
+                <PersonStanding className="h-5 w-5" />
+              </div>
+              <div className="mx-auto mt-0.5 h-1.5 w-4 rounded-full bg-ink/15" />
             </div>
           </div>
         )}
@@ -220,14 +221,14 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
                     : { backgroundColor: "#ffffff", borderColor: "#e4dcff", color: "#9a8fc0" }),
               }}
             >
-              {isDone ? "✓" : ex.orderIndex}
+              {isDone ? <Check className="h-5 w-5" strokeWidth={3.5} /> : ex.orderIndex}
             </button>
           );
         })}
 
         {/* Finish */}
         <div
-          className="absolute z-20 flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] text-xl transition"
+          className="absolute z-20 flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] transition"
           style={{
             left: finishPos.x,
             top: finishPos.y,
@@ -236,17 +237,20 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
               : { backgroundColor: "#ffffff", borderColor: "#e4dcff", opacity: 0.8 }),
           }}
         >
-          🏁
+          <Flag className={allDone ? "h-6 w-6 text-peach" : "h-6 w-6 text-ink-faint"} />
         </div>
       </div>
 
       {/* Status hero */}
-      <div className="mx-auto mt-2 max-w-[320px] rounded-full bg-lav/70 px-4 py-1.5 text-center font-sans text-xs font-extrabold text-ink-soft">
+      <div className="mx-auto mt-2 flex max-w-[320px] items-center justify-center gap-1.5 rounded-full bg-lav/70 px-4 py-1.5 text-center font-sans text-xs font-extrabold text-ink-soft">
         {allDone ? (
-          <span className="text-peach">🎉 Semua soal beres — karaktermu sampai FINISH!</span>
+          <span className="flex items-center gap-1 text-peach">
+            <Flag className="h-3.5 w-3.5" /> Semua soal beres — karaktermu sampai FINISH!
+          </span>
         ) : heroTitle ? (
-          <span>
-            🐣 Posisimu: <span className="text-grape">{heroTitle}</span>
+          <span className="flex items-center gap-1.5">
+            <PersonStanding className="h-4 w-4 text-grape" />
+            Posisimu: <span className="text-grape">{heroTitle}</span>
           </span>
         ) : (
           <span>—</span>

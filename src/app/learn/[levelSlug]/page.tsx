@@ -1,5 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+  ArrowLeft,
+  BookOpen,
+  Check,
+  Database,
+  Flag,
+  Map,
+  Trophy,
+} from "lucide-react";
 import { db } from "@/db/client";
 import { exercises, levels, progress } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
@@ -52,27 +61,26 @@ export default async function LearnLevelPage({
       <div className="flex items-center justify-between">
         <Link
           href="/"
-          className="rounded-full bg-white px-4 py-1.5 text-sm font-extrabold text-grape shadow-sm ring-1 ring-lilac transition hover:-translate-x-0.5 hover:shadow"
+          className="flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-sm font-extrabold text-grape shadow-sm ring-1 ring-lilac transition hover:-translate-x-0.5 hover:shadow"
         >
-          ← Kembali ke Peta
+          <ArrowLeft className="h-4 w-4" /> Kembali ke Peta
         </Link>
-        <span className="rounded-full bg-white px-3 py-1 text-sm font-extrabold text-ink-soft shadow-sm ring-1 ring-lilac">
-          {completedIds.size}/{levelExercises.length} soal ✅
+        <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-sm font-extrabold text-ink-soft shadow-sm ring-1 ring-lilac">
+          <Check className="h-4 w-4 text-mint" />
+          {completedIds.size}/{levelExercises.length} soal
         </span>
       </div>
 
       {/* Header level */}
       <header className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-grape via-grape-deep to-pink p-6 text-white shadow-lg">
-        <div className="pointer-events-none absolute -right-6 -top-8 text-8xl opacity-20">
-          🐘
-        </div>
+        <Database className="pointer-events-none absolute -right-4 -top-5 h-32 w-32 opacity-15" />
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-extrabold backdrop-blur">
             Level {level.orderIndex}
           </span>
           {allDone && (
-            <span className="rounded-full bg-sun px-3 py-1 text-sm font-extrabold text-ink">
-              🏆 Level Selesai!
+            <span className="flex items-center gap-1.5 rounded-full bg-sun px-3 py-1 text-sm font-extrabold text-ink">
+              <Trophy className="h-4 w-4" /> Level Selesai!
             </span>
           )}
         </div>
@@ -88,18 +96,19 @@ export default async function LearnLevelPage({
             href="/"
             className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-sm font-extrabold text-grape shadow transition hover:-translate-y-0.5 hover:shadow-lg"
           >
-            🐣 Lihat karaktermu melaju di peta →
+            <Flag className="h-4 w-4" /> Lihat karaktermu melaju di peta
+            <ArrowLeft className="h-4 w-4 rotate-180" />
           </Link>
         )}
       </header>
 
       {/* Peta misi ular */}
       <section className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-lilac">
-        <h2 className="mb-1 text-center font-display text-lg font-extrabold text-grape">
-          🗺️ Peta Misi Level Ini
+        <h2 className="mb-1 flex items-center justify-center gap-2 text-center font-display text-lg font-extrabold text-grape">
+          <Map className="h-5 w-5" /> Peta Misi Level Ini
         </h2>
         <p className="mb-3 text-center text-xs font-bold text-ink-soft">
-          klik bulatan untuk lompat ke soal · karaktermu maju tiap jawaban benar!
+          Klik bulatan untuk lompat ke soal · karaktermu maju tiap jawaban benar!
         </p>
         <LevelSnakeMap
           exercises={levelExercises.map((e) => ({
@@ -128,24 +137,25 @@ export default async function LearnLevelPage({
             >
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <span
-                  className={`inline-flex h-8 w-8 items-center justify-center rounded-full font-display text-sm font-extrabold text-white ${
+                  className={`flex h-8 w-8 items-center justify-center rounded-full font-display text-sm font-extrabold text-white ${
                     isDone ? "bg-mint" : "bg-grape"
                   }`}
                 >
-                  {isDone ? "✓" : index + 1}
+                  {isDone ? <Check className="h-4 w-4" /> : index + 1}
                 </span>
                 <span className="font-display text-base font-extrabold text-ink">
                   {exercise.title}
                 </span>
                 {isDone && (
-                  <span className="ml-auto rounded-full bg-mint-soft px-3 py-1 text-xs font-extrabold text-mint">
-                    Selesai! ⭐
+                  <span className="ml-auto flex items-center gap-1 rounded-full bg-mint-soft px-3 py-1 text-xs font-extrabold text-mint">
+                    Selesai!
                   </span>
                 )}
               </div>
 
-              <p className="rounded-2xl bg-lav/60 p-3 text-sm font-semibold leading-relaxed text-ink">
-                🎯 {exercise.prompt}
+              <p className="flex gap-2 rounded-2xl bg-lav/60 p-3 text-sm font-semibold leading-relaxed text-ink">
+                <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-grape" />
+                <span>{exercise.prompt}</span>
               </p>
 
               <div className="mt-4">

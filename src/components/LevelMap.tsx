@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Check, Flag, Lock, PersonStanding } from "lucide-react";
 
 export type MapNode = {
   id: number;
@@ -21,7 +22,6 @@ type LevelMapProps = {
 type Pt = { x: number; y: number };
 
 const STORAGE_KEY = "sqlquest-hero-index";
-const HERO = "🐣";
 const STEP_MS = 520; // durasi meluncur antar node
 const GAP_MS = 140; // jeda sebelum tiap langkah
 
@@ -173,15 +173,14 @@ export default function LevelMap({ nodes }: LevelMapProps) {
           }}
         >
           <div className="-translate-x-1/2 -translate-y-1/2">
-            <span
-              className={`block text-4xl leading-none drop-shadow-[0_4px_8px_rgba(124,58,237,0.35)] ${
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-grape to-pink text-white shadow-lg ring-4 ring-white/80 ${
                 moving ? "animate-bounce" : ""
               }`}
               style={moving ? { animationDuration: "420ms" } : undefined}
             >
-              {HERO}
-            </span>
-            {/* bayangan kecil di bawah hero */}
+              <PersonStanding className="h-6 w-6" />
+            </div>
             <div className="mx-auto mt-0.5 h-1.5 w-5 rounded-full bg-ink/15" />
           </div>
         </div>
@@ -198,9 +197,9 @@ export default function LevelMap({ nodes }: LevelMapProps) {
         const c = NODE_COLORS[i % NODE_COLORS.length];
 
         const badge = isLocked ? (
-          <span className="text-lg" aria-hidden>🔒</span>
+          <Lock className="h-5 w-5" />
         ) : isDone ? (
-          <span className="text-lg font-black" aria-hidden>✓</span>
+          <Check className="h-6 w-6" strokeWidth={3.5} />
         ) : (
           <span className="font-display text-lg font-extrabold">{node.orderIndex}</span>
         );
@@ -241,7 +240,7 @@ export default function LevelMap({ nodes }: LevelMapProps) {
                     Level {node.orderIndex} · terkunci
                   </div>
                   <p className="mt-0.5 text-xs font-semibold text-ink-faint/80">
-                    selesaikan level sebelumnya untuk membuka 🔓
+                    selesaikan level sebelumnya untuk membuka
                   </p>
                 </div>
               ) : (
@@ -256,7 +255,7 @@ export default function LevelMap({ nodes }: LevelMapProps) {
                     </span>
                     <span className="rounded-full bg-lav px-2 py-0.5 text-xs font-extrabold text-ink-soft">
                       {node.doneCount}/{node.exerciseCount}
-                      {isDone && <span className="ml-1 text-sun">★</span>}
+                      {isDone && <Check className="ml-1 inline h-3 w-3 text-sun" strokeWidth={3} />}
                     </span>
                   </div>
                   <p className="mt-1 text-xs font-semibold leading-relaxed text-ink-soft">
@@ -289,11 +288,13 @@ export default function LevelMap({ nodes }: LevelMapProps) {
         <div className="flex items-center gap-3">
           <div
             ref={finishDotRef}
-            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px] text-xl transition ${
-              allDone ? "bg-sun/20 border-sun" : "border-lilac bg-white/70 opacity-70"
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px] transition ${
+              allDone
+                ? "border-sun bg-sun/20 text-peach"
+                : "border-lilac bg-white/70 text-ink-faint"
             }`}
           >
-            🏁
+            <Flag className="h-6 w-6" />
           </div>
           <div
             className={`flex-1 rounded-2xl border-2 px-4 py-3 transition ${
@@ -303,11 +304,11 @@ export default function LevelMap({ nodes }: LevelMapProps) {
             }`}
           >
             <div
-              className={`font-display text-sm font-extrabold ${
+              className={`flex items-center gap-1.5 font-display text-sm font-extrabold ${
                 allDone ? "text-peach" : "text-ink-faint"
               }`}
             >
-              FINISH 🎉
+              <Flag className="h-4 w-4" /> FINISH
             </div>
             <p className="mt-0.5 text-xs font-semibold text-ink-soft">
               {allDone
