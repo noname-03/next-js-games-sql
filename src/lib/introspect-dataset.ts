@@ -121,10 +121,10 @@ export async function introspectDataset(datasetSql: string): Promise<DatasetSche
         fkRef: fkCols.get(c.column_name),
       }));
 
-      // Contoh 5 baris pertama
+      // Semua baris data (dipakai panel "contoh isi data" dengan pagination di UI)
       let sampleRows: string[][] = [];
       try {
-        const data = await pg.query(`SELECT * FROM ${quoteIdent(name)} LIMIT 5`);
+        const data = await pg.query(`SELECT * FROM ${quoteIdent(name)}`);
         sampleRows = data.rows.map((row) =>
           columns.map((col) => normCell((row as Record<string, unknown>)[col.name]))
         );

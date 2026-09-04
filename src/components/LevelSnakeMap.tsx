@@ -12,9 +12,11 @@ export type SnakeExercise = {
 type LevelSnakeMapProps = {
   exercises: SnakeExercise[];
   completedIds: number[];
+  compact?: boolean;
 };
 
 // Layout peta ular: 2 kolom zigzag (kiri → kanan → kiri ...), seperti jalur ular.
+// compact dipakai di rail kiri yang sempit.
 const W = 320;
 const LEFT_X = 84;
 const RIGHT_X = 236;
@@ -22,10 +24,23 @@ const PAD_TOP = 56;
 const ROW_H = 100;
 const NODE_R = 26;
 
-function nodePos(i: number): { x: number; y: number } {
+const CW = 232; // compact width
+const CLEFT_X = 58;
+const CRIGHT_X = 174;
+const CPAD_TOP = 44;
+const CROW_H = 78;
+
+function nodePos(i: number, c: boolean): { x: number; y: number } {
   const row = Math.floor(i / 2);
-  const x = i % 2 === 0 ? LEFT_X : RIGHT_X;
-  return { x, y: PAD_TOP + row * ROW_H };
+  const x = c
+    ? i % 2 === 0
+      ? CLEFT_X
+      : CRIGHT_X
+    : i % 2 === 0
+      ? LEFT_X
+      : RIGHT_X;
+  const y = (c ? CPAD_TOP : PAD_TOP) + row * (c ? CROW_H : ROW_H);
+  return { x, y };
 }
 
 function pathD(a: { x: number; y: number }, b: { x: number; y: number }): string {
@@ -41,7 +56,7 @@ const NODE_COLORS = [
   { bg: "#d1fae5", border: "#34d399", text: "#059669" },
 ];
 
-export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMapProps) {
+export default function LevelSnakeMap({ exercises, completedIds, compact = false }: LevelSnakeMapProps) {
   const [done, setDone] = useState<Set<number>>(() => new Set(completedIds));
   const [heroPt, setHeroPt] = useState<{ x: number; y: number } | null>(null);
   const [animating, setAnimating] = useState(false);
@@ -49,6 +64,13 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
 
   const count = exercises.length;
   const allDone = count > 0 && done.size >= count;
+
+  // Ukuran efektif sesuai mode
+  const W_ = compact ? CW : W;
+  const PAD_TOP_ = compact ? CPAD_TOP : PAD_TOP;
+  const ROW_H_ = compact ? CROW_H : ROW_H;
+  const nodeSize = compact ? 40 : 52;
+  const heroSize = compact ? 30 : 36;
 
   // Hero berdiri di soal pertama yang belum selesai; semua selesai → finish (index = count)
   const targetHero = useMemo(() => {
@@ -65,12 +87,18 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
     setDone(new Set(completedIds));
   }, [completedIds]);
 
-  const positions = useMemo(() => exercises.map((_, i) => nodePos(i)), [exercises]);
-  const lastPos = count > 0 ? nodePos(count - 1) : { x: LEFT_X, y: PAD_TOP };
+  const positions = useMemo(
+    () => exercises.map((_, i) => nodePos(i, compact)),
+    [exercises, compact]
+  );
+  const lastPos =
+    count > 0
+      ? nodePos(count - 1, compact)
+      : { x: compact ? CLEFT_X : LEFT_X, y: PAD_TOP_ };
   const finishPos =
     count % 2 === 1
-      ? { x: RIGHT_X, y: lastPos.y }
-      : { x: LEFT_X, y: lastPos.y + ROW_H };
+      ? { x: compact ? CRIGHT_X : RIGHT_X, y: lastPos.y }
+      : { x: compact ? CLEFT_X : LEFT_X, y: lastPos.y + ROW_H_ };
 
   const posFor = (i: number) =>
     i >= count ? finishPos : positions[Math.max(0, Math.min(i, count - 1))];
@@ -116,20 +144,20 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
         ? "FINISH — level ditaklukkan!"
         : null;
 
-  const height = Math.max(finishPos.y + NODE_R + 24, PAD_TOP + ROW_H);
+  const height = Math.max(finishPos.y + NODE_R + 24, PAD_TOP_ + ROW_H_);
   const reduceMotion =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   return (
     <div className="overflow-x-auto pb-2">
-      <div className="relative mx-auto" style={{ width: W, height }}>
+      <div className="relative mx-auto" style={{ width: W_, height }}>
         {/* Jalur ular */}
         <svg
-          viewBox={`0 0 ${W} ${height}`}
+          viewBox={`0 0 ${W_} ${height}`}
           className="absolute inset-0"
           aria-hidden
-          style={{ width: W, height }}
+          style={{ width: W_, height }}
         >
           {Array.from({ length: count + 1 }, (_, seg) => {
             if (seg >= count) return null;
@@ -177,10 +205,10 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
           >
             <div className="-translate-x-1/2 -translate-y-1/2">
               <div
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-grape to-pink text-white shadow-lg ring-4 ring-white/80"
-                style={{ animation: "bob 2.2s ease-in-out infinite" }}
+                className="flex items-center justify-center rounded-full bg-gradient-to-br from-grape to-pink text-white shadow-lg ring-4 ring-white/80"
+                style={{ width: heroSize, height: heroSize, animation: "bob 2.2s ease-in-out infinite" }}
               >
-                <PersonStanding className="h-5 w-5" />
+                <PersonStanding style={{ width: heroSize * 0.62, height: heroSize * 0.62 }} />
               </div>
               <div className="mx-auto mt-0.5 h-1.5 w-4 rounded-full bg-ink/15" />
             </div>
@@ -204,10 +232,13 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
               }
               title={`Soal ${ex.orderIndex}: ${ex.title}`}
               aria-label={`Soal ${ex.orderIndex}: ${ex.title}`}
-              className="absolute z-20 flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] font-display text-base font-extrabold transition"
+              className="absolute z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] font-display text-base font-extrabold transition"
               style={{
                 left: pos.x,
                 top: pos.y,
+                width: nodeSize,
+                height: nodeSize,
+                fontSize: compact ? 13 : 16,
                 ...(isDone
                   ? { backgroundColor: "#d1fae5", borderColor: "#34d399", color: "#059669" }
                   : isHere
@@ -221,41 +252,52 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
                     : { backgroundColor: "#ffffff", borderColor: "#e4dcff", color: "#9a8fc0" }),
               }}
             >
-              {isDone ? <Check className="h-5 w-5" strokeWidth={3.5} /> : ex.orderIndex}
+              {isDone ? (
+                <Check
+                  strokeWidth={3.5}
+                  style={{ width: nodeSize * 0.45, height: nodeSize * 0.45 }}
+                />
+              ) : (
+                ex.orderIndex
+              )}
             </button>
           );
         })}
 
         {/* Finish */}
         <div
-          className="absolute z-20 flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] transition"
+          className="absolute z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] transition"
           style={{
             left: finishPos.x,
             top: finishPos.y,
+            width: nodeSize,
+            height: nodeSize,
             ...(allDone
               ? { backgroundColor: "#fffbeb", borderColor: "#fbbf24", boxShadow: "0 0 0 6px #fbbf2433" }
               : { backgroundColor: "#ffffff", borderColor: "#e4dcff", opacity: 0.8 }),
           }}
         >
-          <Flag className={allDone ? "h-6 w-6 text-peach" : "h-6 w-6 text-ink-faint"} />
+          <Flag className={allDone ? "text-peach" : "text-ink-faint"} style={{ width: nodeSize * 0.5, height: nodeSize * 0.5 }} />
         </div>
       </div>
 
-      {/* Status hero */}
-      <div className="mx-auto mt-2 flex max-w-[320px] items-center justify-center gap-1.5 rounded-full bg-lav/70 px-4 py-1.5 text-center font-sans text-xs font-extrabold text-ink-soft">
-        {allDone ? (
-          <span className="flex items-center gap-1 text-peach">
-            <Flag className="h-3.5 w-3.5" /> Semua soal beres — karaktermu sampai FINISH!
-          </span>
-        ) : heroTitle ? (
-          <span className="flex items-center gap-1.5">
-            <PersonStanding className="h-4 w-4 text-grape" />
-            Posisimu: <span className="text-grape">{heroTitle}</span>
-          </span>
-        ) : (
-          <span>—</span>
-        )}
-      </div>
+      {/* Status hero (disembunyikan di mode compact rail kiri) */}
+      {!compact && (
+        <div className="mx-auto mt-2 flex max-w-[320px] items-center justify-center gap-1.5 rounded-full bg-lav/70 px-4 py-1.5 text-center font-sans text-xs font-extrabold text-ink-soft">
+          {allDone ? (
+            <span className="flex items-center gap-1 text-peach">
+              <Flag className="h-3.5 w-3.5" /> Semua soal beres — karaktermu sampai FINISH!
+            </span>
+          ) : heroTitle ? (
+            <span className="flex items-center gap-1.5">
+              <PersonStanding className="h-4 w-4 text-grape" />
+              Posisimu: <span className="text-grape">{heroTitle}</span>
+            </span>
+          ) : (
+            <span>—</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

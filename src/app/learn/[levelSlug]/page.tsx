@@ -1,20 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  ArrowLeft,
-  BookOpen,
-  Check,
-  Database,
-  Flag,
-  Map,
-  Trophy,
-} from "lucide-react";
 import { db } from "@/db/client";
 import { exercises, levels, progress } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import SqlRunner from "@/components/SqlRunner";
-import SchemaExplorer from "@/components/SchemaExplorer";
-import LevelSnakeMap from "@/components/LevelSnakeMap";
+import LearningLayout from "@/components/LearningLayout";
+import PagedExercises from "@/components/PagedExercises";
 
 export const dynamic = "force-dynamic";
 
@@ -55,121 +44,39 @@ export default async function LearnLevelPage({
   const allDone =
     levelExercises.length > 0 && completedIds.size >= levelExercises.length;
 
+  const snakeExercises = levelExercises.map((e) => ({
+    id: e.id,
+    orderIndex: e.orderIndex,
+    title: e.title,
+  }));
+
+  const pagedExercises = levelExercises.map((e) => ({
+    id: e.id,
+    orderIndex: e.orderIndex,
+    title: e.title,
+    prompt: e.prompt,
+    datasetSql: e.datasetSql,
+    starterSql: e.starterSql,
+    solutionSql: e.solutionSql,
+  }));
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-5 p-4 sm:p-6">
-      {/* Navigasi */}
-      <div className="flex items-center justify-between">
-        <Link
-          href="/"
-          className="flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-sm font-extrabold text-grape shadow-sm ring-1 ring-lilac transition hover:-translate-x-0.5 hover:shadow"
-        >
-          <ArrowLeft className="h-4 w-4" /> Kembali ke Peta
-        </Link>
-        <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-sm font-extrabold text-ink-soft shadow-sm ring-1 ring-lilac">
-          <Check className="h-4 w-4 text-mint" />
-          {completedIds.size}/{levelExercises.length} soal
-        </span>
-      </div>
-
-      {/* Header level */}
-      <header className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-grape via-grape-deep to-pink p-6 text-white shadow-lg">
-        <Database className="pointer-events-none absolute -right-4 -top-5 h-32 w-32 opacity-15" />
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-extrabold backdrop-blur">
-            Level {level.orderIndex}
-          </span>
-          {allDone && (
-            <span className="flex items-center gap-1.5 rounded-full bg-sun px-3 py-1 text-sm font-extrabold text-ink">
-              <Trophy className="h-4 w-4" /> Level Selesai!
-            </span>
-          )}
-        </div>
-        <h1 className="mt-3 font-display text-3xl font-extrabold tracking-tight">
-          {level.title}
-        </h1>
-        <p className="mt-1 max-w-xl text-sm font-semibold text-white/85">
-          {level.description}
-        </p>
-
-        {allDone && (
-          <Link
-            href="/"
-            className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-sm font-extrabold text-grape shadow transition hover:-translate-y-0.5 hover:shadow-lg"
-          >
-            <Flag className="h-4 w-4" /> Lihat karaktermu melaju di peta
-            <ArrowLeft className="h-4 w-4 rotate-180" />
-          </Link>
-        )}
-      </header>
-
-      {/* Peta misi ular */}
-      <section className="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-lilac">
-        <h2 className="mb-1 flex items-center justify-center gap-2 text-center font-display text-lg font-extrabold text-grape">
-          <Map className="h-5 w-5" /> Peta Misi Level Ini
-        </h2>
-        <p className="mb-3 text-center text-xs font-bold text-ink-soft">
-          Klik bulatan untuk lompat ke soal · karaktermu maju tiap jawaban benar!
-        </p>
-        <LevelSnakeMap
-          exercises={levelExercises.map((e) => ({
-            id: e.id,
-            orderIndex: e.orderIndex,
-            title: e.title,
-          }))}
-          completedIds={[...completedIds]}
-        />
-      </section>
-
-      {/* Panel skema database */}
-      <SchemaExplorer schemaJson={level.schemaJson} />
-
-      {/* Daftar soal */}
-      <div className="flex flex-col gap-5">
-        {levelExercises.map((exercise, index) => {
-          const isDone = completedIds.has(exercise.id);
-          return (
-            <section
-              key={exercise.id}
-              id={`exercise-${index + 1}`}
-              className={`scroll-mt-4 rounded-[1.75rem] border-2 bg-white p-5 shadow-sm transition ${
-                isDone ? "border-mint/70" : "border-lilac"
-              }`}
-            >
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-full font-display text-sm font-extrabold text-white ${
-                    isDone ? "bg-mint" : "bg-grape"
-                  }`}
-                >
-                  {isDone ? <Check className="h-4 w-4" /> : index + 1}
-                </span>
-                <span className="font-display text-base font-extrabold text-ink">
-                  {exercise.title}
-                </span>
-                {isDone && (
-                  <span className="ml-auto flex items-center gap-1 rounded-full bg-mint-soft px-3 py-1 text-xs font-extrabold text-mint">
-                    Selesai!
-                  </span>
-                )}
-              </div>
-
-              <p className="flex gap-2 rounded-2xl bg-lav/60 p-3 text-sm font-semibold leading-relaxed text-ink">
-                <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-grape" />
-                <span>{exercise.prompt}</span>
-              </p>
-
-              <div className="mt-4">
-                <SqlRunner
-                  exerciseId={exercise.id}
-                  datasetSql={exercise.datasetSql}
-                  starterSql={exercise.starterSql}
-                  solutionSql={exercise.solutionSql}
-                />
-              </div>
-            </section>
-          );
-        })}
-      </div>
-    </main>
+    <LearningLayout
+      level={{
+        orderIndex: level.orderIndex,
+        title: level.title,
+        description: level.description,
+        slug: level.slug,
+      }}
+      exercises={snakeExercises}
+      completedIds={[...completedIds]}
+      allDone={allDone}
+      schemaJson={level.schemaJson}
+    >
+      <PagedExercises
+        exercises={pagedExercises}
+        completedIds={[...completedIds]}
+      />
+    </LearningLayout>
   );
 }
