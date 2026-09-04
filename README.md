@@ -43,8 +43,9 @@ Siswa menulis query SQL sungguhan di browser dan dieksekusi oleh **PostgreSQL as
 | Layer | Teknologi |
 |---|---|
 | Framework | Next.js 15 (App Router, TypeScript) |
-| Styling | Tailwind CSS v4 (design tokens dark terminal) |
-| Database aplikasi | SQLite (`better-sqlite3`) + Drizzle ORM — level, soal, progress |
+| Styling | Tailwind CSS v4 (design tokens pastel) |
+| Database aplikasi | SQLite (`better-sqlite3`) + Drizzle ORM — user, level, soal, progress |
+| Autentikasi | bcryptjs (hash password) + sesi cookie HMAC-signed |
 | Engine eksekusi SQL | [PGlite](https://pglite.dev) — PostgreSQL WASM di browser |
 | Introspection skema | PGlite (Node) saat seed → `levels.schema_json` |
 | Migrasi/seed | `drizzle-kit push` + script seed (via `tsx`) |
@@ -58,15 +59,21 @@ Siswa menulis query SQL sungguhan di browser dan dieksekusi oleh **PostgreSQL as
 npm install
 
 # 1) buat + isi database aplikasi (levels, exercises, schema per level) → data/learn.db
-npm run db:setup
+npm run db:setup   # sekaligus membuat akun admin (admin / admin123)
 
 # 2) jalankan dev server
 npm run dev
 ```
 
-Buka http://localhost:3000. Pilih level di peta → baca panel skema → tulis query →
-**▶ jalankan**. Benar = banner sukses + konfeti + XP, soal ditandai selesai, level
-berikutnya terbuka di peta.
+Buka http://localhost:3000. Daftar akun → pilih bab & level di peta → baca panel
+skema → tulis query → **Jalankan**. Benar = banner sukses + konfeti + XP, progres
+tersimpan per user.
+
+**Akun admin bawaan:** username `admin`, password `admin123` (segera ganti; bisa di-set
+lewat env `ADMIN_PASSWORD` saat seed). Dashboard admin di `/admin`: statistik umum,
+daftar user + progres, reset password user, reset progres, hapus user.
+
+> Untuk produksi, set env `SESSION_SECRET` (penanda sesi) & `ADMIN_PASSWORD`.
 
 ## Script
 

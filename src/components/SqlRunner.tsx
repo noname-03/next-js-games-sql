@@ -68,11 +68,15 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
     async (attempts: number) => {
       if (!exerciseId) return;
       try {
-        await fetch("/api/progress", {
+        const res = await fetch("/api/progress", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ exerciseId, attempts, xp: 10 }),
         });
+        if (res.status === 401) {
+          // Belum login — arahkan untuk masuk supaya progres tersimpan
+          window.location.href = "/login";
+        }
       } catch {
         // Simpan progress gagal — jangan blokir pengalaman belajar
       }
