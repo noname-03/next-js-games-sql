@@ -18,15 +18,15 @@ type Status =
   | { kind: "mismatch"; userResult: RunResult; solutionResult: RunResult; attempts: number }
   | { kind: "error"; message: string };
 
-// Partikel perayaan: warna tema + delay/posisi/rotasi pseudo-acak stabil
-const CONFETTI_COLORS = ["#fbbf24", "#22d3ee", "#34d399", "#a78bfa", "#fb7185"];
-const CONFETTI_COUNT = 26;
+// Partikel perayaan warna pastel cerah
+const CONFETTI_COLORS = ["#8b5cf6", "#f472b6", "#fb923c", "#34d399", "#38bdf8", "#fbbf24"];
+const CONFETTI_COUNT = 28;
 const confettiPieces = Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
   left: (i * 37) % 100,
   delay: (i % 10) * 0.05,
   color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
   rotate: (i * 47) % 360,
-  size: 4 + (i % 3) * 2,
+  size: 5 + (i % 3) * 2,
 }));
 
 export default function SqlRunner({ datasetSql, starterSql, solutionSql, exerciseId }: SqlRunnerProps) {
@@ -85,7 +85,6 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
         return;
       }
 
-      // Eksekusi solusi di runner yang sama untuk pembanding
       const solutionOutcome: QueryOutcome = await runner.run(solutionSql);
       if (!solutionOutcome.ok || solutionOutcome.kind !== "success") {
         setStatus({ kind: "error", message: "Solusi gagal dijalankan di sandbox." });
@@ -105,7 +104,6 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
         setConfettiBurst((n) => n + 1);
         void recordProgress(attemptsRef.current);
         if (exerciseId) {
-          // Beri tahu peta (LevelSnakeMap) bahwa soal ini baru saja ditaklukkan
           window.dispatchEvent(
             new CustomEvent("sqlquest:exercise-done", { detail: { exerciseId } })
           );
@@ -124,7 +122,6 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
     setStatus({ kind: "idle" });
     setResultTable(null);
     attemptsRef.current = 0;
-    // buat runner baru supaya dataset bersih dari percobaan
     void runnerRef.current?.close();
     runnerRef.current = null;
     setShowHint(false);
@@ -132,21 +129,18 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
 
   const showResult = status.kind === "success" || status.kind === "mismatch";
 
-  const runBtnBase =
-    "rounded-lg border px-4 py-2 font-mono text-sm transition disabled:cursor-not-allowed disabled:opacity-40";
-
   return (
     <div className="flex flex-col gap-3">
       {/* Editor SQL */}
-      <div className="overflow-hidden rounded-xl border border-edge bg-[#05080f]">
-        <div className="flex items-center justify-between border-b border-edge bg-panel px-3 py-1.5">
-          <span className="font-mono text-[11px] text-faint">
-            query.sql — PostgreSQL
+      <div className="overflow-hidden rounded-2xl border-2 border-lilac bg-white shadow-sm">
+        <div className="flex items-center justify-between border-b-2 border-lilac/60 bg-lav/50 px-3 py-2">
+          <span className="font-display text-xs font-extrabold text-ink-soft">
+            ✍️ Tulis query-mu di sini (PostgreSQL)
           </span>
           <span className="flex gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-danger/60" />
-            <span className="h-2.5 w-2.5 rounded-full bg-xp/60" />
-            <span className="h-2.5 w-2.5 rounded-full bg-succ/60" />
+            <span className="h-3 w-3 rounded-full bg-rose/80" />
+            <span className="h-3 w-3 rounded-full bg-sun/90" />
+            <span className="h-3 w-3 rounded-full bg-mint" />
           </span>
         </div>
         <textarea
@@ -155,41 +149,43 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
           spellCheck={false}
           rows={6}
           aria-label="Editor query SQL"
-          className="block w-full resize-y bg-transparent p-4 font-mono text-sm leading-relaxed text-phosphor caret-quest outline-none placeholder:text-faint"
-          placeholder="-- tulis query PostgreSQL-mu di sini"
+          className="block w-full resize-y bg-[#faf8ff] p-4 font-mono text-sm leading-relaxed text-ink caret-grape outline-none placeholder:text-ink-faint"
+          placeholder="-- tulis query PostgreSQL-mu di sini, contoh: SELECT * FROM students;"
         />
       </div>
 
       {/* Aksi */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           onClick={runQuery}
           disabled={status.kind === "running" || successRef.current}
-          className={`${runBtnBase} border-quest/60 bg-quest/15 text-quest hover:bg-quest/25 ${
-            status.kind === "running" ? "" : "animate-pulse-glow"
+          className={`rounded-full px-6 py-2.5 font-display text-sm font-extrabold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 ${
+            status.kind === "running" ? "bg-ink-soft" : "animate-pulse-glow bg-grape"
           }`}
         >
-          {status.kind === "running" ? "▮ menjalankan..." : "▶ jalankan"}
+          {status.kind === "running" ? "⏳ Menjalankan..." : "🚀 Jalankan"}
         </button>
         <button
           onClick={reset}
-          className={`${runBtnBase} border-edge bg-panel-2 text-fog hover:border-faint hover:text-phosphor`}
+          className="rounded-full border-2 border-lilac bg-white px-5 py-2.5 font-display text-sm font-extrabold text-ink-soft transition hover:border-rose/40 hover:text-rose"
         >
-          ↺ reset
+          ↺ Reset
         </button>
         <button
           onClick={() => setShowHint((v) => !v)}
-          className={`${runBtnBase} border-edge bg-panel-2 text-fog hover:border-faint hover:text-phosphor`}
+          className="rounded-full border-2 border-lilac bg-white px-5 py-2.5 font-display text-sm font-extrabold text-ink-soft transition hover:border-sun/60 hover:text-peach"
         >
-          {showHint ? "▲ sembunyikan hint" : "▼ hint"}
+          {showHint ? "🙈 Sembunyikan Hint" : "💡 Lihat Hint"}
         </button>
       </div>
 
       {/* Hint */}
       {showHint && (
-        <div className="rounded-xl border border-xp/30 bg-xp/5 p-3 font-mono text-xs text-xp">
-          <span className="mr-2">// hint:</span>
-          <code>{solutionSql}</code>
+        <div className="animate-pop-in rounded-2xl border-2 border-dashed border-sun bg-sun/10 p-3">
+          <span className="mb-1 block font-display text-xs font-extrabold text-peach">
+            💡 Petunjuk — coba query seperti ini:
+          </span>
+          <code className="whitespace-pre-wrap font-mono text-xs text-ink">{solutionSql}</code>
         </div>
       )}
 
@@ -197,27 +193,25 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
       {status.kind === "error" && (
         <div
           role="alert"
-          className="rounded-xl border border-danger/40 bg-danger/10 p-3 font-mono text-sm text-danger"
+          className="animate-pop-in rounded-2xl border-2 border-rose/40 bg-rose/10 p-3 font-sans text-sm font-bold text-[#be123c]"
         >
-          <span className="mr-2">✗ error:</span>
-          {status.message}
+          😅 Ups, error! {status.message}
         </div>
       )}
 
       {/* Status: sukses */}
       {status.kind === "success" && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           <div
             role="status"
-            className="animate-pop-in relative overflow-visible rounded-xl border border-succ/50 bg-succ/10 p-3 font-mono text-sm text-succ"
+            className="animate-pop-in relative overflow-visible rounded-2xl border-2 border-mint bg-mint-soft p-4 font-display text-base font-extrabold text-[#047857]"
           >
-            {/* Konfeti */}
             {confettiBurst > 0 && (
               <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-2 h-40">
                 {confettiPieces.map((p, i) => (
                   <span
                     key={`${confettiBurst}-${i}`}
-                    className="animate-confetti absolute top-0 block rounded-[1px]"
+                    className="animate-confetti absolute top-0 block rounded-[2px]"
                     style={{
                       left: `${p.left}%`,
                       width: p.size,
@@ -230,18 +224,17 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
                 ))}
               </div>
             )}
-            <span className="mr-2">✓ query benar!</span>
+            <span>🎉 BENAR! Query-mu cocok dengan solusi.</span>
             {status.result && (
-              <span className="text-fog">
-                ({status.result.rowCount} baris · {status.result.timeMs} ms · percobaan{" "}
-                {status.attempts})
+              <span className="mt-1 block font-sans text-sm font-bold text-[#047857]/80">
+                {status.result.rowCount} baris · {status.result.timeMs} ms · percobaan ke-
+                {status.attempts}
               </span>
             )}
           </div>
-          {/* XP float */}
           <div className="pointer-events-none relative h-0">
-            <span className="animate-float-up absolute right-4 top-0 font-mono text-lg font-bold text-xp">
-              +10 XP
+            <span className="animate-float-up absolute right-4 top-0 font-display text-xl font-extrabold text-peach drop-shadow-sm">
+              +10 XP ⚡
             </span>
           </div>
         </div>
@@ -251,25 +244,24 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
       {status.kind === "mismatch" && (
         <div
           role="status"
-          className="rounded-xl border border-xp/40 bg-xp/10 p-3 font-mono text-sm text-xp"
+          className="animate-pop-in rounded-2xl border-2 border-peach/50 bg-peach/10 p-3 font-sans text-sm font-bold text-[#c2410c]"
         >
-          <span className="mr-2">≈ belum tepat:</span>
-          hasil query-mu belum sama dengan solusi. coba lagi!
+          🤔 Belum tepat — hasil query-mu belum sama dengan solusi. Coba lagi, kamu pasti bisa!
         </div>
       )}
 
       {/* Tabel hasil */}
       {showResult && resultTable && (
-        <div className="overflow-hidden rounded-xl border border-edge">
-          <div className="border-b border-edge bg-panel px-3 py-1.5 font-mono text-[11px] text-faint">
-            hasil ({resultTable.rowCount} baris)
+        <div className="animate-pop-in overflow-hidden rounded-2xl border-2 border-lilac bg-white">
+          <div className="border-b-2 border-lilac/60 bg-lav/50 px-3 py-2 font-display text-xs font-extrabold text-ink-soft">
+            📊 Hasil query ({resultTable.rowCount} baris)
           </div>
-          <div className="overflow-x-auto bg-[#05080f]">
+          <div className="overflow-x-auto">
             <table className="w-full font-mono text-sm">
               <thead>
-                <tr className="border-b border-edge bg-panel/60 text-left">
+                <tr className="bg-grape/5 text-left">
                   {resultTable.columns.map((c) => (
-                    <th key={c} className="px-3 py-2 font-semibold text-quest">
+                    <th key={c} className="px-3 py-2 font-extrabold text-grape">
                       {c}
                     </th>
                   ))}
@@ -277,12 +269,9 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
               </thead>
               <tbody>
                 {resultTable.rows.map((row, i) => (
-                  <tr
-                    key={i}
-                    className={i % 2 ? "bg-panel/20" : "bg-transparent"}
-                  >
+                  <tr key={i} className={i % 2 ? "bg-lav/30" : "bg-white"}>
                     {row.map((cell, j) => (
-                      <td key={j} className="px-3 py-1.5 text-phosphor/90">
+                      <td key={j} className="px-3 py-1.5 text-ink">
                         {cell}
                       </td>
                     ))}

@@ -32,6 +32,14 @@ function pathD(a: { x: number; y: number }, b: { x: number; y: number }): string
   return `M ${a.x} ${a.y} C ${a.x} ${midY}, ${b.x} ${midY}, ${b.x} ${b.y}`;
 }
 
+// Warna node bergantian biar ceria
+const NODE_COLORS = [
+  { bg: "#ede9fe", border: "#8b5cf6", text: "#7c3aed" },
+  { bg: "#fce7f3", border: "#f472b6", text: "#db2777" },
+  { bg: "#fff7ed", border: "#fb923c", text: "#ea580c" },
+  { bg: "#d1fae5", border: "#34d399", text: "#059669" },
+];
+
 export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMapProps) {
   const [done, setDone] = useState<Set<number>>(() => new Set(completedIds));
   const [heroPt, setHeroPt] = useState<{ x: number; y: number } | null>(null);
@@ -51,14 +59,13 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
     return count;
   }, [done, exercises, count, allDone]);
 
-  // Sinkronkan state lokal bila prop berubah (mis. habis refresh / navigasi)
+  // Sinkronkan state lokal bila prop berubah
   useEffect(() => {
     setDone(new Set(completedIds));
   }, [completedIds]);
 
   const positions = useMemo(() => exercises.map((_, i) => nodePos(i)), [exercises]);
   const lastPos = count > 0 ? nodePos(count - 1) : { x: LEFT_X, y: PAD_TOP };
-  // Finish: jika ular berakhir di kiri → finish di kanan baris sama; jika kanan → baris baru di kiri
   const finishPos =
     count % 2 === 1
       ? { x: RIGHT_X, y: lastPos.y }
@@ -72,13 +79,11 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
     const dest = posFor(targetHero);
     if (firstRun.current) {
       firstRun.current = false;
-      setHeroPt(dest); // langsung di posisi, tanpa animasi
+      setHeroPt(dest);
       return;
     }
-    // Fase 1: set transisi mati, paksa browser catat posisi lama
     setAnimating(false);
     requestAnimationFrame(() => {
-      // Fase 2: hidupkan transisi lalu pindah ke tujuan
       setAnimating(true);
       requestAnimationFrame(() => {
         setHeroPt(dest);
@@ -87,19 +92,16 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
   }, [targetHero]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Dengarkan event "soal selesai" dari SqlRunner → tandai done & hero melaju
-  const handleDone = useCallback(
-    (e: Event) => {
-      const id = (e as CustomEvent<{ exerciseId: number }>).detail?.exerciseId;
-      if (!id) return;
-      setDone((prev) => {
-        if (prev.has(id)) return prev;
-        const next = new Set(prev);
-        next.add(id);
-        return next;
-      });
-    },
-    []
-  );
+  const handleDone = useCallback((e: Event) => {
+    const id = (e as CustomEvent<{ exerciseId: number }>).detail?.exerciseId;
+    if (!id) return;
+    setDone((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     window.addEventListener("sqlquest:exercise-done", handleDone);
@@ -119,7 +121,7 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto pb-2">
       <div className="relative mx-auto" style={{ width: W, height }}>
         {/* Jalur ular */}
         <svg
@@ -129,7 +131,6 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
           style={{ width: W, height }}
         >
           {Array.from({ length: count + 1 }, (_, seg) => {
-            // segmen seg: dari node seg menuju node seg+1 (atau finish di akhir)
             if (seg >= count) return null;
             const from = seg < count ? positions[seg] : lastPos;
             const to = seg === count - 1 ? finishPos : positions[seg + 1];
@@ -139,11 +140,11 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
                 key={`seg-${seg}`}
                 d={pathD(from, to)}
                 fill="none"
-                stroke={passed ? "#34d399" : "#1e2a40"}
-                strokeWidth={passed ? 5 : 3}
+                stroke={passed ? "#8b5cf6" : "#e0d8f8"}
+                strokeWidth={passed ? 6 : 4}
                 strokeLinecap="round"
-                strokeDasharray={passed ? "none" : "1 7"}
-                opacity={passed ? 0.95 : 0.7}
+                strokeDasharray={passed ? "none" : "1 8"}
+                opacity={passed ? 1 : 0.8}
                 style={{ transition: "stroke 0.4s" }}
               />
             );
@@ -153,8 +154,8 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
             <path
               d={pathD(lastPos, finishPos)}
               fill="none"
-              stroke="#fbbf24"
-              strokeWidth={5}
+              stroke="#fb923c"
+              strokeWidth={6}
               strokeLinecap="round"
             />
           )}
@@ -175,12 +176,12 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
           >
             <div className="-translate-x-1/2 -translate-y-1/2">
               <span
-                className="block text-[28px] leading-none drop-shadow-[0_0_10px_rgba(251,191,36,0.55)]"
-                style={{ animation: "bounce 1.8s ease-in-out infinite" }}
+                className="block text-[30px] leading-none drop-shadow-[0_4px_8px_rgba(124,58,237,0.35)]"
+                style={{ animation: "bob 2.2s ease-in-out infinite" }}
               >
-                🧙
+                🐣
               </span>
-              <div className="mx-auto mt-0.5 h-1.5 w-5 rounded-full bg-black/50" />
+              <div className="mx-auto mt-0.5 h-1.5 w-5 rounded-full bg-ink/15" />
             </div>
           </div>
         )}
@@ -190,6 +191,7 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
           const pos = positions[i];
           const isDone = done.has(ex.id);
           const isHere = targetHero === i;
+          const c = NODE_COLORS[i % NODE_COLORS.length];
           return (
             <button
               key={ex.id}
@@ -201,20 +203,21 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
               }
               title={`Soal ${ex.orderIndex}: ${ex.title}`}
               aria-label={`Soal ${ex.orderIndex}: ${ex.title}`}
-              className="absolute z-20 flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 font-mono text-sm font-bold transition"
+              className="absolute z-20 flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] font-display text-base font-extrabold transition"
               style={{
                 left: pos.x,
                 top: pos.y,
                 ...(isDone
-                  ? { borderColor: "#34d399", backgroundColor: "#0d1a14", color: "#34d399" }
+                  ? { backgroundColor: "#d1fae5", borderColor: "#34d399", color: "#059669" }
                   : isHere
                     ? {
-                        borderColor: "#22d3ee",
-                        backgroundColor: "#0d1524",
-                        color: "#22d3ee",
-                        boxShadow: "0 0 14px rgba(34,211,238,0.35)",
+                        backgroundColor: c.bg,
+                        borderColor: c.border,
+                        color: c.text,
+                        boxShadow: `0 0 0 6px ${c.border}33`,
+                        transform: "translate(-50%,-50%) scale(1.1)",
                       }
-                    : { borderColor: "#1e2a40", backgroundColor: "#0d1524", color: "#5c6f8c" }),
+                    : { backgroundColor: "#ffffff", borderColor: "#e4dcff", color: "#9a8fc0" }),
               }}
             >
               {isDone ? "✓" : ex.orderIndex}
@@ -224,13 +227,13 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
 
         {/* Finish */}
         <div
-          className="absolute z-20 flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 text-xl"
+          className="absolute z-20 flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] text-xl transition"
           style={{
             left: finishPos.x,
             top: finishPos.y,
             ...(allDone
-              ? { borderColor: "#fbbf24", backgroundColor: "#1c1505", boxShadow: "0 0 16px rgba(251,191,36,0.45)" }
-              : { borderColor: "#1e2a40", backgroundColor: "#0d1524", opacity: 0.7 }),
+              ? { backgroundColor: "#fffbeb", borderColor: "#fbbf24", boxShadow: "0 0 0 6px #fbbf2433" }
+              : { backgroundColor: "#ffffff", borderColor: "#e4dcff", opacity: 0.8 }),
           }}
         >
           🏁
@@ -238,15 +241,15 @@ export default function LevelSnakeMap({ exercises, completedIds }: LevelSnakeMap
       </div>
 
       {/* Status hero */}
-      <div className="mx-auto mt-1 max-w-[320px] text-center font-mono text-xs text-fog">
+      <div className="mx-auto mt-2 max-w-[320px] rounded-full bg-lav/70 px-4 py-1.5 text-center font-sans text-xs font-extrabold text-ink-soft">
         {allDone ? (
-          <span className="text-xp">🎉 semua soal beres — hero-mu sampai FINISH!</span>
+          <span className="text-peach">🎉 Semua soal beres — karaktermu sampai FINISH!</span>
         ) : heroTitle ? (
           <span>
-            <span className="text-xp">🧙 posisimu:</span> {heroTitle}
+            🐣 Posisimu: <span className="text-grape">{heroTitle}</span>
           </span>
         ) : (
-          <span className="text-faint">—</span>
+          <span>—</span>
         )}
       </div>
     </div>

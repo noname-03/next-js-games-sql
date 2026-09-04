@@ -60,40 +60,40 @@ export default async function Home() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-8 p-6">
-      {/* Header quest */}
-      <header className="flex flex-col gap-3 border-b border-edge pb-6 pt-6">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl text-quest">▲</span>
-          <h1 className="text-3xl font-bold tracking-wide text-phosphor">
-            SQL<span className="text-quest">_</span>QUEST
-          </h1>
+      {/* Header ceria */}
+      <header className="mt-2 flex flex-col items-center gap-3 text-center">
+        <div className="flex items-end gap-2 text-5xl">
+          <span className="animate-bob inline-block">🐣</span>
+          <span className="animate-bob inline-block" style={{ animationDelay: "0.15s" }}>⚡</span>
+          <span className="animate-bob inline-block" style={{ animationDelay: "0.3s" }}>🐘</span>
         </div>
-        <p className="font-mono text-sm text-fog">
-          <span className="text-quest">$</span> selamat datang, petualang.
-          Taklukkan 10 level PostgreSQL dan raih XP sebanyak-banyaknya.
+        <h1 className="text-4xl font-extrabold tracking-tight text-grape">
+          SQL Quest
+        </h1>
+        <p className="max-w-md text-base font-semibold text-ink-soft">
+          Petualangan seru belajar SQL! Selesaikan misi, kumpulkan XP, dan jadilah
+          master database. 🚀
         </p>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-sm">
-          <span className="text-fog">
-            progres:{" "}
-            <span className="font-semibold text-phosphor">
-              {totalDone}/{totalCount}
-            </span>{" "}
-            soal
+        {/* Statistik */}
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+          <span className="rounded-full bg-white px-4 py-1.5 text-sm font-extrabold text-grape shadow-sm ring-1 ring-lilac">
+            📚 {totalDone}/{totalCount} soal
           </span>
-          <span className="text-fog">
-            total XP:{" "}
-            <span className="font-semibold text-xp">⚡ {totalXp}</span>
+          <span className="rounded-full bg-white px-4 py-1.5 text-sm font-extrabold text-peach shadow-sm ring-1 ring-lilac">
+            ⚡ {totalXp} XP
           </span>
           {allDone && (
-            <span className="text-succ">✓ semua level ditaklukkan!</span>
+            <span className="rounded-full bg-mint-soft px-4 py-1.5 text-sm font-extrabold text-mint">
+              🏆 semua level ditaklukkan!
+            </span>
           )}
         </div>
 
-        {/* Progress bar global */}
-        <div className="h-2 w-full overflow-hidden rounded-full bg-ink">
+        {/* Progress bar */}
+        <div className="h-4 w-full max-w-md overflow-hidden rounded-full bg-lilac/70 ring-1 ring-white">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-quest to-phosphor transition-all duration-700"
+            className="h-full rounded-full bg-gradient-to-r from-grape via-pink to-peach transition-all duration-700"
             style={{
               width: `${totalCount === 0 ? 0 : (totalDone / totalCount) * 100}%`,
             }}
@@ -102,15 +102,18 @@ export default async function Home() {
       </header>
 
       {/* Peta petualangan */}
-      <section className="flex flex-col items-center gap-4">
-        <h2 className="w-full max-w-xl text-left font-mono text-xs uppercase tracking-[0.2em] text-faint">
-          // peta petualangan
+      <section className="flex flex-col items-center gap-3 rounded-[2rem] bg-white/70 p-6 shadow-sm ring-1 ring-lilac backdrop-blur">
+        <h2 className="w-full text-center text-xl font-extrabold text-grape">
+          🗺️ Peta Petualanganmu
         </h2>
+        <p className="text-center text-sm font-semibold text-ink-soft">
+          Ikuti jalurnya, selesaikan tiap level, dan lihat karaktermu melaju!
+        </p>
         <LevelMap nodes={mapNodes} />
       </section>
 
-      <footer className="border-t border-edge pt-4 pb-6 text-center font-mono text-xs text-faint">
-        <span className="cursor-blink">ketik query, kalahkan database</span>
+      <footer className="pb-6 text-center text-sm font-bold text-ink-faint">
+        dibuat dengan 💜 untuk para calon master database
       </footer>
     </main>
   );

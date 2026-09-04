@@ -10,12 +10,12 @@ type SchemaExplorerProps = {
 function Pill({ children, tone }: { children: React.ReactNode; tone: "pk" | "fk" | "null" }) {
   const cls =
     tone === "pk"
-      ? "bg-amber-500/15 text-amber-300 ring-amber-400/30"
+      ? "bg-sun/20 text-[#b45309]"
       : tone === "fk"
-        ? "bg-sky-500/15 text-sky-300 ring-sky-400/30"
-        : "bg-gray-500/15 text-gray-400 ring-gray-400/20";
+        ? "bg-sky/15 text-[#0369a1]"
+        : "bg-lilac text-ink-soft";
   return (
-    <span className={`inline-block rounded px-1.5 py-0.5 font-mono text-[10px] ring-1 ${cls}`}>
+    <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-extrabold ${cls}`}>
       {children}
     </span>
   );
@@ -36,56 +36,69 @@ export default function SchemaExplorer({ schemaJson }: SchemaExplorerProps) {
   const tableCount = schema?.tables.length ?? 0;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-cyan-500/25 bg-[#0b1220]">
+    <div className="overflow-hidden rounded-[1.75rem] bg-white shadow-sm ring-1 ring-lilac">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-cyan-500/5"
+        className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition hover:bg-lav/50"
         aria-expanded={open}
       >
-        <span className="flex items-center gap-2 font-mono text-sm text-cyan-300">
-          <span className={open ? "rotate-90 transition-transform" : "transition-transform"}>▸</span>
-          <span className="text-cyan-500">$</span> schema --database {tableCount > 0 ? `(${tableCount} tabel)` : ""}
+        <span className="flex items-center gap-2 font-display text-base font-extrabold text-grape">
+          <span
+            className={`text-sm transition-transform ${open ? "rotate-90" : ""}`}
+          >
+            ▶
+          </span>
+          <span className="text-lg">🗄️</span> Lihat Data Tabel (Skema Database)
         </span>
-        <span className="font-mono text-xs text-gray-500">
-          {tableCount > 0 ? `${tableCount} relation${tableCount > 1 ? "s" : ""}` : "kosong"}
+        <span className="rounded-full bg-lav px-3 py-1 text-xs font-extrabold text-ink-soft">
+          {tableCount > 0 ? `${tableCount} tabel` : "kosong"}
         </span>
       </button>
 
       {open && schema && (
-        <div className="flex flex-col gap-4 border-t border-cyan-500/15 px-4 py-4">
-          <p className="font-mono text-xs text-gray-400">
-            // Tabel yang tersedia di level ini — perhatikan kolom <span className="text-amber-300">PK</span> dan{" "}
-            <span className="text-sky-300">FK</span> untuk menyusun JOIN.
+        <div className="flex flex-col gap-5 border-t-2 border-lilac/60 px-5 py-5">
+          <p className="rounded-2xl bg-sky/10 p-3 text-xs font-bold leading-relaxed text-ink-soft">
+            💡 Ini tabel yang bisa kamu pakai di level ini. Lihat kolom{" "}
+            <span className="text-[#b45309]">🔑 PK</span> (kunci utama) dan{" "}
+            <span className="text-[#0369a1]">FK</span> (kunci tamu) untuk tahu cara
+            menyambung tabel saat JOIN!
           </p>
 
           {schema.tables.map((table) => (
             <div key={table.name} className="flex flex-col gap-2">
-              <div className="font-mono text-sm font-semibold text-emerald-300">
-                <span className="text-gray-500">table</span> {table.name}
+              <div className="flex items-center gap-2">
+                <span className="rounded-lg bg-grape/10 px-2.5 py-1 font-mono text-sm font-extrabold text-grape">
+                  📋 {table.name}
+                </span>
               </div>
 
-              <div className="overflow-x-auto rounded-lg border border-gray-700/60">
-                <table className="w-full font-mono text-xs">
+              <div className="overflow-hidden rounded-2xl border-2 border-lilac">
+                <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-gray-700/60 bg-gray-800/40 text-left text-gray-400">
-                      <th className="px-3 py-1.5 font-medium">kolom</th>
-                      <th className="px-3 py-1.5 font-medium">tipe</th>
-                      <th className="px-3 py-1.5 font-medium">atribut</th>
+                    <tr className="bg-lav/70 font-display text-xs font-extrabold uppercase tracking-wide text-ink-soft">
+                      <th className="px-3 py-2">Kolom</th>
+                      <th className="px-3 py-2">Tipe</th>
+                      <th className="px-3 py-2">Info</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {table.columns.map((col) => (
-                      <tr key={col.name} className="border-b border-gray-800/60 last:border-0">
-                        <td className="px-3 py-1.5 text-gray-200">
-                          {col.isPk && <span className="mr-1 text-amber-300">🔑</span>}
+                    {table.columns.map((col, ci) => (
+                      <tr
+                        key={col.name}
+                        className={`border-t border-lilac/60 font-mono text-[13px] ${
+                          ci % 2 ? "bg-lav/30" : "bg-white"
+                        }`}
+                      >
+                        <td className="px-3 py-2 font-bold text-ink">
+                          {col.isPk && <span className="mr-1">🔑</span>}
                           {col.name}
                         </td>
-                        <td className="px-3 py-1.5 text-violet-300">{col.type}</td>
-                        <td className="px-3 py-1.5">
+                        <td className="px-3 py-2 text-grape">{col.type}</td>
+                        <td className="px-3 py-2">
                           <span className="flex flex-wrap gap-1">
                             {col.isPk && <Pill tone="pk">PK</Pill>}
                             {col.isFk && <Pill tone="fk">FK → {col.fkRef}</Pill>}
-                            {col.nullable && <Pill tone="null">NULL?</Pill>}
+                            {col.nullable && <Pill tone="null">boleh kosong</Pill>}
                           </span>
                         </td>
                       </tr>
@@ -95,23 +108,30 @@ export default function SchemaExplorer({ schemaJson }: SchemaExplorerProps) {
               </div>
 
               {table.sampleRows.length > 0 && (
-                <div className="overflow-x-auto rounded-lg border border-gray-800 bg-black/30">
-                  <div className="border-b border-gray-800 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-gray-500">
-                    contoh data (max {table.sampleRows.length} baris)
+                <div className="overflow-hidden rounded-2xl border-2 border-dashed border-lilac bg-lav/20">
+                  <div className="bg-lilac/40 px-3 py-1.5 font-display text-[11px] font-extrabold uppercase tracking-wide text-ink-soft">
+                    👀 Contoh isi data (beberapa baris)
                   </div>
-                  <table className="w-full font-mono text-xs">
-                    <tbody>
-                      {table.sampleRows.map((row, i) => (
-                        <tr key={i} className="border-b border-gray-800/50 last:border-0">
-                          {row.map((cell, j) => (
-                            <td key={j} className="px-3 py-1 text-gray-300">
-                              {cell}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div className="overflow-x-auto">
+                    <table className="w-full font-mono text-xs">
+                      <tbody>
+                        {table.sampleRows.map((row, i) => (
+                          <tr
+                            key={i}
+                            className={`border-t border-lilac/50 ${
+                              i % 2 ? "bg-white/50" : "bg-transparent"
+                            }`}
+                          >
+                            {row.map((cell, j) => (
+                              <td key={j} className="px-3 py-1.5 text-ink-soft">
+                                {cell}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>

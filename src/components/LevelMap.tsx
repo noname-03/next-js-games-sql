@@ -21,9 +21,17 @@ type LevelMapProps = {
 type Pt = { x: number; y: number };
 
 const STORAGE_KEY = "sqlquest-hero-index";
-const HERO = "🧙";
+const HERO = "🐣";
 const STEP_MS = 520; // durasi meluncur antar node
 const GAP_MS = 140; // jeda sebelum tiap langkah
+
+// Warna node bergantian biar peta ceria
+const NODE_COLORS = [
+  { bg: "#ede9fe", border: "#8b5cf6", text: "#7c3aed" },
+  { bg: "#fce7f3", border: "#f472b6", text: "#db2777" },
+  { bg: "#fff7ed", border: "#fb923c", text: "#ea580c" },
+  { bg: "#d1fae5", border: "#34d399", text: "#059669" },
+];
 
 /**
  * Posisi hero: berdiri di node "open" pertama (level yang sedang dikerjakan).
@@ -148,7 +156,7 @@ export default function LevelMap({ nodes }: LevelMapProps) {
       {/* Garis jalur utama */}
       <div
         aria-hidden
-        className="absolute bottom-4 top-4 w-1 rounded-full bg-gradient-to-b from-quest/60 via-quest/25 to-succ/60"
+        className="absolute bottom-4 top-4 w-1.5 rounded-full bg-gradient-to-b from-grape/50 via-pink/40 to-peach/60"
       />
 
       {/* Hero — karakter pemain */}
@@ -166,7 +174,7 @@ export default function LevelMap({ nodes }: LevelMapProps) {
         >
           <div className="-translate-x-1/2 -translate-y-1/2">
             <span
-              className={`block text-3xl leading-none drop-shadow-[0_0_10px_rgba(251,191,36,0.55)] ${
+              className={`block text-4xl leading-none drop-shadow-[0_4px_8px_rgba(124,58,237,0.35)] ${
                 moving ? "animate-bounce" : ""
               }`}
               style={moving ? { animationDuration: "420ms" } : undefined}
@@ -174,7 +182,7 @@ export default function LevelMap({ nodes }: LevelMapProps) {
               {HERO}
             </span>
             {/* bayangan kecil di bawah hero */}
-            <div className="mx-auto mt-0.5 h-1 w-4 rounded-full bg-black/50" />
+            <div className="mx-auto mt-0.5 h-1.5 w-5 rounded-full bg-ink/15" />
           </div>
         </div>
       )}
@@ -187,25 +195,31 @@ export default function LevelMap({ nodes }: LevelMapProps) {
             ? 0
             : Math.round((node.doneCount / node.exerciseCount) * 100);
         const offset = i % 2 === 0 ? "self-start" : "self-end";
+        const c = NODE_COLORS[i % NODE_COLORS.length];
 
         const badge = isLocked ? (
-          <span className="text-base" aria-hidden>🔒</span>
+          <span className="text-lg" aria-hidden>🔒</span>
         ) : isDone ? (
-          <span className="text-base font-bold text-succ" aria-hidden>✓</span>
+          <span className="text-lg font-black" aria-hidden>✓</span>
         ) : (
-          <span className="font-mono text-sm font-bold text-quest">{node.orderIndex}</span>
+          <span className="font-display text-lg font-extrabold">{node.orderIndex}</span>
         );
 
-        const nodeRing = isLocked
-          ? "border-faint/30 bg-panel text-faint"
+        const nodeStyle = isLocked
+          ? { backgroundColor: "#f1f1f6", borderColor: "#d9d9e8", color: "#b0b0c8" }
           : isDone
-            ? "border-succ/70 bg-[#0d1a14] text-succ shadow-[0_0_12px_rgba(52,211,153,0.25)]"
-            : "border-quest/70 bg-panel text-quest shadow-[0_0_12px_rgba(34,211,238,0.25)] animate-pulse-glow";
+            ? { backgroundColor: "#d1fae5", borderColor: "#34d399", color: "#059669" }
+            : {
+                backgroundColor: c.bg,
+                borderColor: c.border,
+                color: c.text,
+                boxShadow: `0 6px 16px ${c.border}44`,
+              };
 
         return (
           <div
             key={node.id}
-            className={`animate-pop-in relative z-10 mb-6 w-[86%] ${offset}`}
+            className={`animate-pop-in relative z-10 mb-5 w-[88%] ${offset}`}
             style={{ animationDelay: `${i * 80}ms` }}
           >
             <div className="flex items-center gap-3">
@@ -214,44 +228,49 @@ export default function LevelMap({ nodes }: LevelMapProps) {
                 ref={(el) => {
                   dotRefs.current[i] = el;
                 }}
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 ${nodeRing}`}
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px]"
+                style={nodeStyle}
               >
                 {badge}
               </div>
 
               {/* Kartu level */}
               {isLocked ? (
-                <div className="flex-1 rounded-xl border border-edge bg-panel/30 px-4 py-3 opacity-70">
-                  <div className="font-mono text-sm text-faint">
-                    Level {node.orderIndex} — terkunci
+                <div className="flex-1 rounded-2xl border-2 border-lilac bg-white/60 px-4 py-3 opacity-75">
+                  <div className="font-display text-sm font-bold text-ink-faint">
+                    Level {node.orderIndex} · terkunci
                   </div>
-                  <p className="mt-0.5 text-xs text-faint/70">
-                    selesaikan level sebelumnya untuk membuka
+                  <p className="mt-0.5 text-xs font-semibold text-ink-faint/80">
+                    selesaikan level sebelumnya untuk membuka 🔓
                   </p>
                 </div>
               ) : (
                 <Link
                   href={`/learn/${node.slug}`}
-                  className="group flex-1 rounded-xl border border-edge bg-panel/70 px-4 py-3 transition hover:border-quest/60 hover:bg-panel"
+                  className="group flex-1 rounded-2xl border-2 border-lilac bg-white px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  style={{ boxShadow: `0 4px 0 ${c.border}33` }}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-mono text-sm font-semibold text-phosphor group-hover:text-quest">
+                    <span className="font-display text-sm font-extrabold text-ink group-hover:text-grape">
                       {node.title}
                     </span>
-                    <span className="font-mono text-xs text-faint">
+                    <span className="rounded-full bg-lav px-2 py-0.5 text-xs font-extrabold text-ink-soft">
                       {node.doneCount}/{node.exerciseCount}
-                      {isDone && <span className="ml-1 text-xp">★</span>}
+                      {isDone && <span className="ml-1 text-sun">★</span>}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs leading-relaxed text-fog">
+                  <p className="mt-1 text-xs font-semibold leading-relaxed text-ink-soft">
                     {node.description}
                   </p>
-                  <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-ink">
+                  <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-lav">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
-                        isDone ? "bg-succ" : "bg-quest"
+                        isDone ? "bg-mint" : ""
                       }`}
-                      style={{ width: `${pct}%` }}
+                      style={{
+                        width: `${pct}%`,
+                        backgroundColor: isDone ? undefined : c.border,
+                      }}
                     />
                   </div>
                 </Link>
@@ -264,34 +283,36 @@ export default function LevelMap({ nodes }: LevelMapProps) {
       {/* Garis akhir */}
       <div
         key="finish"
-        className="animate-pop-in relative z-10 mb-2 w-[86%] self-center"
+        className="animate-pop-in relative z-10 mb-2 w-[88%] self-center"
         style={{ animationDelay: `${nodes.length * 80}ms` }}
       >
         <div className="flex items-center gap-3">
           <div
             ref={finishDotRef}
-            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 text-xl ${
-              allDone
-                ? "border-xp bg-[#1c1505] shadow-[0_0_14px_rgba(251,191,36,0.4)]"
-                : "border-faint/30 bg-panel opacity-60"
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px] text-xl transition ${
+              allDone ? "bg-sun/20 border-sun" : "border-lilac bg-white/70 opacity-70"
             }`}
           >
             🏁
           </div>
           <div
-            className={`flex-1 rounded-xl border px-4 py-3 ${
+            className={`flex-1 rounded-2xl border-2 px-4 py-3 transition ${
               allDone
-                ? "border-xp/50 bg-xp/10"
-                : "border-edge bg-panel/30 opacity-60"
+                ? "border-sun bg-sun/10"
+                : "border-lilac bg-white/60 opacity-70"
             }`}
           >
-            <div className={`font-mono text-sm font-semibold ${allDone ? "text-xp" : "text-faint"}`}>
-              FINISH
+            <div
+              className={`font-display text-sm font-extrabold ${
+                allDone ? "text-peach" : "text-ink-faint"
+              }`}
+            >
+              FINISH 🎉
             </div>
-            <p className="mt-0.5 text-xs text-fog">
+            <p className="mt-0.5 text-xs font-semibold text-ink-soft">
               {allDone
-                ? "semua level ditaklukkan — petualangan SQL-mu selesai!"
-                : "bendera akhir petualangan"}
+                ? "kamu sudah menaklukkan semua level — luar biasa!"
+                : "garis akhir petualanganmu"}
             </p>
           </div>
         </div>

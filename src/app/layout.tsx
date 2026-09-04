@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
+import { Baloo_2, Nunito } from "next/font/google";
 import "./globals.css";
+
+const baloo = Baloo_2({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const nunito = Nunito({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "SQL Quest",
   description:
-    "Game pembelajaran SQL — taklukkan PostgreSQL lewat level interaktif bergaya terminal.",
+    "Game pembelajaran SQL yang seru — taklukkan 10 level PostgreSQL dan jadilah master database!",
 };
 
 export default function RootLayout({
@@ -14,7 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className="antialiased">{children}</body>
+      <body className={`${baloo.variable} ${nunito.variable} antialiased`}>
+        {children}
+      </body>
     </html>
   );
 }
