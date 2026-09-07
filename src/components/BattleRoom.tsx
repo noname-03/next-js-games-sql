@@ -197,7 +197,9 @@ export default function BattleRoom({ battleId, userId, username, displayName, ex
   const me = battle.players.find((p) => p.userId === userId);
   const opponent = battle.players.find((p) => p.userId !== userId);
   const isFinished = battle.status === "finished";
-  const iWon = isFinished && me?.status === "done" && opponent?.status !== "done";
+  const iWon = isFinished && me?.status === "done" && opponent?.status === "done"
+    ? (me.durationMs ?? Infinity) < (opponent.durationMs ?? Infinity)
+    : me?.status === "done" && opponent?.status !== "done";
 
   return (
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-4 p-4">
