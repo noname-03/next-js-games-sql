@@ -94,7 +94,16 @@ export default function BattleRoom({ battleId, userId, username, displayName, ex
     });
     socket.on("countdown", (state: BattleData) => {
       setBattle(state);
+      setCode(state.starterSql);
       setCountdown(3);
+      // Preload PGlite during countdown so query runs instantly
+      if (state.datasetSql) {
+        loadRunner().then(() => {
+          if (!runnerRef.current && createRunner) {
+            createRunner(state.datasetSql).then((r) => { runnerRef.current = r; });
+          }
+        });
+      }
       const iv = setInterval(() => {
         setCountdown((c) => {
           if (c <= 1) { clearInterval(iv); return 0; }
