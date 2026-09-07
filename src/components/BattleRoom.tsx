@@ -16,8 +16,18 @@ import {
   XCircle,
 } from "lucide-react";
 import { getSocket } from "@/lib/socket";
-import { createRunner, compareResults } from "@/lib/pglite-runner";
-import type { RunResult } from "@/lib/pglite-runner";
+// Lazy load PGlite (15MB WASM) only when user runs a query
+let createRunner: typeof import("@/lib/pglite-runner").createRunner | null = null;
+let compareResults: typeof import("@/lib/pglite-runner").compareResults | null = null;
+type RunResult = { columns: string[]; rows: string[][]; rowCount: number; timeMs: number };
+
+async function loadRunner() {
+  if (!createRunner) {
+    const mod = await import("@/lib/pglite-runner");
+    createRunner = mod.createRunner;
+    compareResults = mod.compareResults;
+  }
+}
 
 type PlayerInfo = {
   userId: number;
@@ -64,7 +74,7 @@ export default function BattleRoom({ battleId, userId, username, displayName, ex
   const [copied, setCopied] = useState(false);
   const [actualBattleId, setActualBattleId] = useState(battleId);
   const socketRef = useRef(getSocket());
-  const runnerRef = useRef<ReturnType<typeof createRunner> extends Promise<infer T> ? T : never>(null as any);
+  const runnerRef = useRef<any>(null);
   const startedAtRef = useRef<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -139,8 +149,9 @@ export default function BattleRoom({ battleId, userId, username, displayName, ex
   const runQuery = useCallback(async () => {
     if (!battle || iFinished) return;
     try {
+      await loadRunner();
       if (!runnerRef.current) {
-        runnerRef.current = await createRunner(battle.datasetSql);
+        runnerRef.current = await createRunner!(battle.datasetSql);
       }
       const runner = runnerRef.current;
       const outcome = await runner.run(code);
@@ -154,7 +165,7 @@ export default function BattleRoom({ battleId, userId, username, displayName, ex
         return;
       }
       const userResult = outcome.result;
-      const ok = compareResults(userResult, sol.result, /order\\s+by/i.test(battle.solutionSql || ""));
+      const ok = compareResults!(userResult, sol.result, /order\\s+by/i.test(battle.solutionSql || ""));
       setMyAttempts((a) => a + 1);
       setResult(userResult);
       if (ok) {
