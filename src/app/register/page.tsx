@@ -41,7 +41,7 @@ export default function RegisterPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-[2rem] bg-white p-8 shadow-lg ring-1 ring-lilac">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg ring-1 ring-lilac">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-grape/10">
             <Database className="h-7 w-7 text-grape" />
@@ -63,7 +63,7 @@ export default function RegisterPage() {
               onChange={(e) => setUsername(e.target.value)}
               required
               autoComplete="username"
-              className="w-full rounded-2xl border-2 border-lilac bg-lav/30 px-4 py-2.5 text-sm font-semibold text-ink outline-none transition focus:border-grape"
+              className="w-full rounded-xl border-2 border-lilac bg-lav/30 px-4 py-2.5 text-sm font-semibold text-ink outline-none transition focus:border-grape"
               placeholder="mis. budi2024 (3-20 karakter)"
             />
           </div>
@@ -75,7 +75,7 @@ export default function RegisterPage() {
               id="displayName"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full rounded-2xl border-2 border-lilac bg-lav/30 px-4 py-2.5 text-sm font-semibold text-ink outline-none transition focus:border-grape"
+              className="w-full rounded-xl border-2 border-lilac bg-lav/30 px-4 py-2.5 text-sm font-semibold text-ink outline-none transition focus:border-grape"
               placeholder="mis. Budi"
             />
           </div>
@@ -91,7 +91,7 @@ export default function RegisterPage() {
               required
               minLength={6}
               autoComplete="new-password"
-              className="w-full rounded-2xl border-2 border-lilac bg-lav/30 px-4 py-2.5 text-sm font-semibold text-ink outline-none transition focus:border-grape"
+              className="w-full rounded-xl border-2 border-lilac bg-lav/30 px-4 py-2.5 text-sm font-semibold text-ink outline-none transition focus:border-grape"
               placeholder="minimal 6 karakter"
             />
           </div>

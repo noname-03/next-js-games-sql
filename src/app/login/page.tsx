@@ -40,7 +40,7 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-[2rem] bg-white p-8 shadow-lg ring-1 ring-lilac">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg ring-1 ring-lilac">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-grape/10">
             <Database className="h-7 w-7 text-grape" />
@@ -62,7 +62,7 @@ export default function LoginPage() {
               onChange={(e) => setUsername(e.target.value)}
               required
               autoComplete="username"
-              className="w-full rounded-2xl border-2 border-lilac bg-lav/30 px-4 py-2.5 text-sm font-semibold text-ink outline-none transition focus:border-grape"
+              className="w-full rounded-xl border-2 border-lilac bg-lav/30 px-4 py-2.5 text-sm font-semibold text-ink outline-none transition focus:border-grape"
               placeholder="username"
             />
           </div>
@@ -77,7 +77,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="w-full rounded-2xl border-2 border-lilac bg-lav/30 px-4 py-2.5 text-sm font-semibold text-ink outline-none transition focus:border-grape"
+              className="w-full rounded-xl border-2 border-lilac bg-lav/30 px-4 py-2.5 text-sm font-semibold text-ink outline-none transition focus:border-grape"
               placeholder="••••••••"
             />
           </div>

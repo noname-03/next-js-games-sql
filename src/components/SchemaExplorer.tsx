@@ -46,7 +46,7 @@ function DataTable({ columns, rows }: { columns: { name: string; isPk: boolean }
 
   return (
     <div>
-      <div className="overflow-x-auto rounded-xl border border-lilac">
+      <div className="overflow-x-auto rounded-lg border border-lilac">
         <table className="w-full font-mono text-xs">
           <thead>
             <tr className="bg-lav/80 text-left">
@@ -121,7 +121,7 @@ export default function SchemaExplorer({ schemaJson, open, onToggle }: SchemaExp
   if (!open) return null; // panel disembunyikan — tombol buka ada di tepi kanan halaman
 
   return (
-    <aside className="flex h-full flex-col overflow-hidden rounded-[1.5rem] bg-white shadow-sm ring-1 ring-lilac">
+    <aside className="flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-lilac">
       {/* Header panel */}
       <div className="flex items-center justify-between gap-2 border-b-2 border-lilac/60 bg-lav/40 px-4 py-3">
         <div className="flex items-center gap-2 font-display text-sm font-extrabold text-grape">
@@ -165,7 +165,7 @@ export default function SchemaExplorer({ schemaJson, open, onToggle }: SchemaExp
             {expanded && (
               <div className="flex flex-col gap-2">
                 {/* Struktur kolom */}
-                <div className="overflow-x-auto rounded-xl border border-lilac">
+                <div className="overflow-x-auto rounded-lg border border-lilac">
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-lav/80 font-display text-[10px] font-extrabold uppercase tracking-wide text-ink-soft">

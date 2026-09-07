@@ -27,18 +27,15 @@
   --color-peach: #fb923c;      /* XP / aksen hangat */
   --color-mint: #34d399;       /* sukses */
   --color-mint-soft: #d1fae5;
-  --color-sky: #38bdf8;        /* info */
-  --color-rose: #fb7185;       /* error / semangat */
-  --color-sun: #fbbf24;        /* bintang */
-  --color-pink: #f472b6;       /* aksen kedua */
+  --color-sky: #38bdf8;        /* info — rarely used */
+  --color-rose: #fb7185;       /* error */
+  --color-sun: #fbbf24;        /* star / trophy */
 }
 
 /* Latar gradien pastel lembut menyeluruh */
 body {
   background:
-    radial-gradient(1200px 600px at 90% -10%, rgba(244, 114, 182, 0.14), transparent 60%),
-    radial-gradient(1000px 500px at -10% 20%, rgba(124, 58, 237, 0.12), transparent 55%),
-    radial-gradient(900px 500px at 50% 110%, rgba(56, 189, 248, 0.10), transparent 55%),
+    radial-gradient(800px 400px at 85% 0%, rgba(124, 58, 237, 0.10), transparent 55%),
     var(--color-lav);
   color: var(--color-ink);
   font-family: var(--font-sans);

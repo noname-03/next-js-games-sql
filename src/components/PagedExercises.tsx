@@ -46,7 +46,7 @@ export default function PagedExercises({ exercises, completedIds }: PagedExercis
             <section
               key={exercise.id}
               id={`exercise-${exercise.orderIndex}`}
-              className={`scroll-mt-4 rounded-[1.75rem] border-2 bg-white p-5 shadow-sm transition ${
+              className={`scroll-mt-4 rounded-2xl border-2 bg-white p-5 shadow-sm transition ${
                 isDone ? "border-mint/70" : "border-lilac"
               }`}
             >

@@ -52,7 +52,7 @@ export default function Leaderboard({ bab = null }: LeaderboardProps) {
     bab !== null && bab !== undefined ? `Papan Juara Bab ${bab}` : "Papan Juara Umum";
 
   return (
-    <div className="w-full rounded-[1.75rem] bg-white/80 p-4 shadow-sm ring-1 ring-lilac backdrop-blur">
+    <div className="w-full rounded-2xl bg-white/80 p-4 shadow-sm ring-1 ring-lilac backdrop-blur">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h3 className="flex items-center gap-2 font-display text-lg font-extrabold text-grape">
           <Trophy className="h-5 w-5" /> {title}

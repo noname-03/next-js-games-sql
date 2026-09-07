@@ -172,7 +172,7 @@ export default function LevelMap({ nodes }: LevelMapProps) {
       {rail && (
         <div
           aria-hidden
-          className="absolute w-1.5 rounded-full bg-gradient-to-b from-grape/60 via-pink/50 to-peach/60"
+          className="absolute w-1.5 rounded-full bg-gradient-to-b from-grape/60 via-peach/40 to-peach/60"
           style={{
             left: 24 - 3, // pusat kolom jalur (24px) dikurangi separuh tebal garis
             top: rail.top,

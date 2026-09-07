@@ -161,7 +161,7 @@ export default function LearningLayout({
 
         {/* ===== TENGAH: banner + soal ===== */}
         <main className="min-w-0 flex-1">
-          <div className="relative mb-5 overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-grape via-grape-deep to-pink p-5 text-white shadow-lg">
+          <div className="relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-grape via-grape-deep to-peach p-5 text-white shadow-lg">
             <Database className="pointer-events-none absolute -right-3 -top-4 h-28 w-28 opacity-15" />
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-white/20 px-3 py-0.5 text-sm font-extrabold backdrop-blur">
@@ -191,7 +191,7 @@ export default function LearningLayout({
 
           {/* Kartu materi: istilah baru dijelaskan DULU sebelum soal */}
           {concept && explanation && (
-            <div className="mb-5 overflow-hidden rounded-[1.75rem] border-2 border-sun/50 bg-gradient-to-br from-sun/10 via-white to-pink/5 shadow-sm">
+            <div className="mb-5 overflow-hidden rounded-2xl border-2 border-sun/50 bg-gradient-to-br from-sun/10 via-white to-pink/5 shadow-sm">
               <div className="flex items-center gap-2 border-b-2 border-sun/30 bg-sun/15 px-5 py-3">
                 <Lightbulb className="h-5 w-5 text-peach" />
                 <h2 className="font-display text-base font-extrabold text-ink">

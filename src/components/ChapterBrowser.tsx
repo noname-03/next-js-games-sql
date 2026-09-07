@@ -53,7 +53,7 @@ export default function ChapterBrowser({
   if (activeChapter !== null) {
     const c = CHAPTER_COLORS[(activeChapter - 1) % CHAPTER_COLORS.length];
     return (
-      <section className="flex flex-col items-center gap-3 rounded-[2rem] bg-white/70 p-5 shadow-sm ring-1 ring-lilac backdrop-blur">
+      <section className="flex flex-col items-center gap-3 rounded-2xl bg-white/70 p-5 shadow-sm ring-1 ring-lilac backdrop-blur">
         <div className="flex w-full items-center justify-between gap-2">
           <button
             onClick={() => router.push("/")}
@@ -101,7 +101,7 @@ export default function ChapterBrowser({
 
   // Mode daftar bab
   return (
-    <section className="flex flex-col items-center gap-4 rounded-[2rem] bg-white/70 p-6 shadow-sm ring-1 ring-lilac backdrop-blur">
+    <section className="flex flex-col items-center gap-4 rounded-2xl bg-white/70 p-6 shadow-sm ring-1 ring-lilac backdrop-blur">
       <h2 className="flex items-center gap-2 text-center text-xl font-extrabold text-grape">
         <Map className="h-5 w-5" /> Pilih Bab Petualangan
       </h2>

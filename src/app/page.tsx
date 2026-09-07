@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { BookOpen, Database, Sparkles, Trophy, Zap } from "lucide-react";
+import { BookOpen, Database, Star, Trophy } from "lucide-react";
 import { db } from "@/db/client";
 import { exercises, levels, progress } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
@@ -190,10 +190,9 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 p-4 sm:p-6">
       {/* Header ceria */}
       <header className="mt-2 flex flex-col items-center gap-3 text-center">
-        <div className="flex items-center gap-3 text-grape">
-          <Sparkles className="animate-bob h-7 w-7 text-sun" />
+        <div className="flex items-center gap-2 text-grape">
           <Database className="animate-bob h-8 w-8 text-grape" style={{ animationDelay: "0.15s" }} />
-          <Zap className="animate-bob h-7 w-7 text-peach" style={{ animationDelay: "0.3s" }} />
+          
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight text-grape">SQL Quest</h1>
         <p className="max-w-md text-base font-semibold text-ink-soft">
@@ -205,7 +204,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
             <BookOpen className="h-4 w-4" /> {totalDone}/{totalCount} soal
           </span>
           <span className="flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-sm font-extrabold text-peach shadow-sm ring-1 ring-lilac">
-            <Zap className="h-4 w-4" /> {totalXp} XP
+            <Star className="h-4 w-4" /> {totalXp} XP
           </span>
           {allDone && (
             <span className="flex items-center gap-1.5 rounded-full bg-mint-soft px-4 py-1.5 text-sm font-extrabold text-mint">

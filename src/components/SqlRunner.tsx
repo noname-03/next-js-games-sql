@@ -12,7 +12,7 @@ import {
   Table2,
   Timer,
   TriangleAlert,
-  Zap,
+  Star,
 } from "lucide-react";
 import { createRunner, compareResults } from "@/lib/pglite-runner";
 import type { RunQueryFn, QueryOutcome, RunResult } from "@/lib/pglite-runner";
@@ -32,7 +32,7 @@ type Status =
   | { kind: "error"; message: string };
 
 // Partikel perayaan warna pastel cerah
-const CONFETTI_COLORS = ["#8b5cf6", "#f472b6", "#fb923c", "#34d399", "#38bdf8", "#fbbf24"];
+const CONFETTI_COLORS = ["#8b5cf6", "#fbbf24", "#fb923c", "#34d399", "#38bdf8", "#fbbf24"];
 const CONFETTI_COUNT = 28;
 const confettiPieces = Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
   left: (i * 37) % 100,
@@ -206,11 +206,7 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
           <span className="flex items-center gap-1.5 font-display text-xs font-extrabold text-ink-soft">
             <PenLine className="h-3.5 w-3.5" /> Tulis query-mu di sini (PostgreSQL)
           </span>
-          <span className="flex gap-1.5">
-            <span className="h-3 w-3 rounded-full bg-rose/80" />
-            <span className="h-3 w-3 rounded-full bg-sun/90" />
-            <span className="h-3 w-3 rounded-full bg-mint" />
-          </span>
+
         </div>
         <textarea
           value={code}
@@ -335,7 +331,7 @@ export default function SqlRunner({ datasetSql, starterSql, solutionSql, exercis
           </div>
           <div className="pointer-events-none relative h-0">
             <span className="animate-float-up absolute right-4 top-0 flex items-center gap-1 font-display text-xl font-extrabold text-peach drop-shadow-sm">
-              <Zap className="h-5 w-5 fill-peach" /> +10 XP
+              <Star className="h-5 w-5 fill-peach" /> +10 XP
             </span>
           </div>
         </div>
