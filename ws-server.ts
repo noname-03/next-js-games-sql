@@ -88,7 +88,7 @@ const db = new Database(dbPath, { readonly: true });
 
 function safeState(b: BattleState) {
   return {
-    id: b.id, exerciseId: b.exerciseId, prompt: b.prompt, datasetSql: b.datasetSql, starterSql: b.starterSql,
+    id: b.id, exerciseId: b.exerciseId, prompt: b.prompt, datasetSql: b.datasetSql, starterSql: b.starterSql, solutionSql: b.solutionSql,
     players: b.players.map(p => ({ userId: p.userId, displayName: p.displayName, status: p.status, attempts: p.attempts })),
     status: b.status,
   };
