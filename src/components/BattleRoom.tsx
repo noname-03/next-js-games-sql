@@ -62,6 +62,7 @@ export default function BattleRoom({ battleId, userId, username, displayName, ex
   const [myAttempts, setMyAttempts] = useState(0);
   const [iFinished, setIFinished] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [actualBattleId, setActualBattleId] = useState(battleId);
   const socketRef = useRef(getSocket());
   const runnerRef = useRef<ReturnType<typeof createRunner> extends Promise<infer T> ? T : never>(null as any);
   const startedAtRef = useRef<number | null>(null);
@@ -72,7 +73,7 @@ export default function BattleRoom({ battleId, userId, username, displayName, ex
     socket.on("created", (data: { battleId: string; state: BattleData }) => {
       setBattle(data.state);
       setCode(data.state.starterSql);
-      // Update URL to actual battleId
+      setActualBattleId(data.battleId);
       if (typeof window !== "undefined") {
         window.history.replaceState(null, "", "/battle/" + data.battleId);
       }
@@ -176,7 +177,7 @@ export default function BattleRoom({ battleId, userId, username, displayName, ex
   };
 
   const handleForfeit = () => {
-    socketRef.current.emit("forfeit", { battleId, userId });
+    socketRef.current.emit("forfeit", { battleId: actualBattleId, userId });
   };
 
   if (!battle) {
@@ -184,10 +185,10 @@ export default function BattleRoom({ battleId, userId, username, displayName, ex
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-4 p-4">
         <Loader2 className="h-8 w-8 animate-spin text-grape" />
         <p className="font-display text-lg font-extrabold text-grape">
-          {battleId === "new" ? "Membuat battle..." : "Menunggu battle..."}
+          {actualBattleId === "new" ? "Membuat battle..." : "Menunggu battle..."}
         </p>
         <p className="text-sm font-semibold text-ink-soft">
-          {battleId === "new" ? "Tunggu sebentar..." : "Pastikan link battle benar"}
+          {actualBattleId === "new" ? "Tunggu sebentar..." : "Pastikan link battle benar"}
         </p>
       </main>
     );
@@ -208,7 +209,7 @@ export default function BattleRoom({ battleId, userId, username, displayName, ex
           <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-ink-soft shadow-sm ring-1 ring-lilac">
             <Swords className="h-3.5 w-3.5" /> Battle #{battle.id}
           </span>
-          <button onClick={copyLink} className="flex items-center gap-1 rounded-full border border-lilac bg-white px-3 py-1.5 text-xs font-extrabold text-ink-soft transition hover:bg-lav">
+          <button onClick={() => { navigator.clipboard.writeText(window.location.origin + "/battle/" + actualBattleId); setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="flex items-center gap-1 rounded-full border border-lilac bg-white px-3 py-1.5 text-xs font-extrabold text-ink-soft transition hover:bg-lav">
             {copied ? <CheckCircle2 className="h-3.5 w-3.5 text-mint" /> : <Copy className="h-3.5 w-3.5" />}
           </button>
         </div>
@@ -259,15 +260,15 @@ export default function BattleRoom({ battleId, userId, username, displayName, ex
           <p className="mt-1 text-sm font-semibold text-ink-soft">Bagikan link di bawah ke temanmu</p>
           <div className="mt-4 rounded-xl bg-lav/50 p-4">
             <p className="mb-1 text-xs font-bold uppercase tracking-wide text-ink-faint">Battle ID</p>
-            <p className="font-mono text-2xl font-extrabold text-grape tracking-wider">{battleId}</p>
+            <p className="font-mono text-2xl font-extrabold text-grape tracking-wider">{actualBattleId}</p>
           </div>
           <div className="mt-3 rounded-xl bg-lav/50 p-4">
             <p className="mb-1 text-xs font-bold uppercase tracking-wide text-ink-faint">Link Battle</p>
             <div className="flex items-center gap-2">
               <code className="flex-1 truncate rounded-lg bg-white px-3 py-2 text-xs font-mono text-ink ring-1 ring-lilac">
-                {typeof window !== "undefined" ? window.location.origin : ""}/battle/{battleId}
+                {typeof window !== "undefined" ? window.location.origin : ""}/battle/{actualBattleId}
               </code>
-              <button onClick={copyLink} className="shrink-0 flex items-center gap-1 rounded-lg bg-grape px-3 py-2 text-sm font-extrabold text-white transition hover:bg-grape-deep">
+              <button onClick={() => { navigator.clipboard.writeText(window.location.origin + "/battle/" + actualBattleId); setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="shrink-0 flex items-center gap-1 rounded-lg bg-grape px-3 py-2 text-sm font-extrabold text-white transition hover:bg-grape-deep">
                 {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copied ? "OK!" : "Salin"}
               </button>
