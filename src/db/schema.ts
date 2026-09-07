@@ -61,3 +61,33 @@ export type NewExercise = typeof exercises.$inferInsert;
 export type ProgressRow = typeof progress.$inferSelect;
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+
+// ===== Battle tables =====
+export const battles = sqliteTable("battles", {
+  id: text("id").primaryKey(), // UUID pendek
+  exerciseId: integer("exercise_id")
+    .notNull()
+    .references(() => exercises.id),
+  player1Id: integer("player1_id")
+    .notNull()
+    .references(() => users.id),
+  player2Id: integer("player2_id")
+    .notNull()
+    .references(() => users.id),
+  status: text("status", { enum: ["active", "finished", "cancelled"] }).notNull().default("active"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  finishedAt: integer("finished_at", { mode: "timestamp" }),
+});
+
+export const battleResults = sqliteTable("battle_results", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  battleId: text("battle_id")
+    .notNull()
+    .references(() => battles.id, { onDelete: "cascade" }),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  attempts: integer("attempts").notNull().default(0),
+  durationMs: integer("duration_ms"),
+  isWinner: integer("is_winner", { mode: "boolean" }).notNull().default(false),
+});

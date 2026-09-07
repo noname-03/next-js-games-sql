@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogIn, LogOut, ShieldCheck, User as UserIcon } from "lucide-react";
+import { LogIn, LogOut, ShieldCheck, Swords, User as UserIcon } from "lucide-react";
 
 type SessionUser = {
   id: number;
@@ -82,6 +82,12 @@ export default function UserBadge() {
           <ShieldCheck className="h-4 w-4" /> Admin
         </Link>
       )}
+      <Link
+          href="/battle"
+          className="flex items-center gap-1 rounded-full bg-peach/15 px-3 py-1.5 text-xs font-extrabold text-peach ring-1 ring-peach/30 transition hover:bg-peach/25"
+        >
+          <Swords className="h-3.5 w-3.5" /> Battle
+        </Link>
       <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-sm font-extrabold text-ink shadow-sm ring-1 ring-lilac">
         <UserIcon className="h-4 w-4 text-grape" /> {user.displayName}
       </span>
