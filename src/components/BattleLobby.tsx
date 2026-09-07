@@ -5,13 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Copy,
   Crosshair,
-  Loader2,
   Shield,
   Swords,
   Trophy,
-  Check,
 } from "lucide-react";
 
 type Level = { id: number; orderIndex: number; title: string; slug: string };
@@ -44,45 +41,23 @@ export default function BattleLobby({
 }: Props) {
   const router = useRouter();
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
-  const [creating, setCreating] = useState(false);
   const [joinCode, setJoinCode] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const handleCreate = async () => {
+  const handleCreate = () => {
     if (!isLoggedIn) { router.push("/login"); return; }
     if (!selectedLevel) return;
-    setCreating(true);
-    try {
-      // Ambil random exercise dari level yang dipilih
-      const res = await fetch("/api/battle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ exerciseId: selectedLevel }),
-      });
-      const data = await res.json();
-      if (data.battleId) {
-        router.push(`/battle/${data.battleId}`);
-      }
-    } catch {
-      setCreating(false);
-    }
+    router.push("/battle/new?exerciseId=" + selectedLevel);
   };
 
   const handleJoin = () => {
     if (!isLoggedIn) { router.push("/login"); return; }
     if (!joinCode.trim()) return;
-    router.push(`/battle/${joinCode.trim()}`);
-  };
-
-  const copyLink = (battleId: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/battle/${battleId}`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    router.push("/battle/" + joinCode.trim());
   };
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-4 sm:p-6">
-      {/* Header */}
       <header className="flex items-center gap-3">
         <Link
           href="/"
@@ -125,14 +100,10 @@ export default function BattleLobby({
 
         <button
           onClick={handleCreate}
-          disabled={!selectedLevel || creating}
+          disabled={!selectedLevel}
           className="flex items-center gap-2 rounded-full bg-grape px-6 py-2.5 font-display text-sm font-extrabold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50"
         >
-          {creating ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Swords className="h-4 w-4" />
-          )}
+          <Swords className="h-4 w-4" />
           Buat Battle
         </button>
       </section>
@@ -163,6 +134,16 @@ export default function BattleLobby({
         </div>
       </section>
 
+      {/* Login prompt for non-logged in users */}
+      {!isLoggedIn && (
+        <section className="rounded-2xl bg-grape/5 p-5 text-center ring-1 ring-grape/20">
+          <p className="text-sm font-bold text-grape">
+            <Link href="/login" className="underline">Masuk</Link> atau{" "}
+            <Link href="/register" className="underline">daftar</Link> untuk mulai battle!
+          </p>
+        </section>
+      )}
+
       {/* History */}
       {history.length > 0 && (
         <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-lilac">
@@ -179,9 +160,7 @@ export default function BattleLobby({
               >
                 <span
                   className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold ${
-                    h.iWon
-                      ? "bg-sun text-[#b45309]"
-                      : "bg-lilac text-ink-faint"
+                    h.iWon ? "bg-sun text-[#b45309]" : "bg-lilac text-ink-faint"
                   }`}
                 >
                   {h.iWon ? <Trophy className="h-3.5 w-3.5" /> : "L"}

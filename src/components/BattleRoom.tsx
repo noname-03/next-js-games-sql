@@ -43,6 +43,7 @@ type Props = {
   userId: number;
   username: string;
   displayName: string;
+  exerciseId?: number;
 };
 
 function fmt(ms: number) {
@@ -51,7 +52,7 @@ function fmt(ms: number) {
   return m + ":" + (s % 60).toString().padStart(2, "0");
 }
 
-export default function BattleRoom({ battleId, userId, username, displayName }: Props) {
+export default function BattleRoom({ battleId, userId, username, displayName, exerciseId }: Props) {
   const [battle, setBattle] = useState<BattleData | null>(null);
   const [code, setCode] = useState("");
   const [countdown, setCountdown] = useState(0);
@@ -71,6 +72,10 @@ export default function BattleRoom({ battleId, userId, username, displayName }: 
     socket.on("created", (data: { battleId: string; state: BattleData }) => {
       setBattle(data.state);
       setCode(data.state.starterSql);
+      // Update URL to actual battleId
+      if (typeof window !== "undefined") {
+        window.history.replaceState(null, "", "/battle/" + data.battleId);
+      }
     });
     socket.on("player-joined", (state: BattleData) => {
       setBattle(state);
@@ -117,8 +122,14 @@ export default function BattleRoom({ battleId, userId, username, displayName }: 
 
   useEffect(() => {
     const socket = socketRef.current;
-    socket.emit("join", { battleId, userId, username, displayName });
-  }, [battleId, userId, username, displayName]);
+    if (battleId === "new" && exerciseId) {
+      // Creator: create battle via socket
+      socket.emit("create", { exerciseId, userId, username, displayName });
+    } else if (battleId !== "new") {
+      // Opponent: join existing battle
+      socket.emit("join", { battleId, userId, username, displayName });
+    }
+  }, [battleId, userId, username, displayName, exerciseId]);
 
   useEffect(() => {
     return () => { void runnerRef.current?.close(); };
@@ -170,11 +181,14 @@ export default function BattleRoom({ battleId, userId, username, displayName }: 
 
   if (!battle) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <div className="flex items-center gap-3 text-grape">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="font-display text-lg font-extrabold">Menunggu battle...</span>
-        </div>
+      <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-4 p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-grape" />
+        <p className="font-display text-lg font-extrabold text-grape">
+          {battleId === "new" ? "Membuat battle..." : "Menunggu battle..."}
+        </p>
+        <p className="text-sm font-semibold text-ink-soft">
+          {battleId === "new" ? "Tunggu sebentar..." : "Pastikan link battle benar"}
+        </p>
       </main>
     );
   }

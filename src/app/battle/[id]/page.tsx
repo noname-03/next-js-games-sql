@@ -6,13 +6,16 @@ export const dynamic = "force-dynamic";
 
 export default async function BattleRoomPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ exerciseId?: string }>;
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   const { id } = await params;
+  const { exerciseId } = await searchParams;
 
   return (
     <BattleRoom
@@ -20,6 +23,7 @@ export default async function BattleRoomPage({
       userId={user.id}
       username={user.username}
       displayName={user.displayName}
+      exerciseId={exerciseId ? parseInt(exerciseId, 10) : undefined}
     />
   );
 }
