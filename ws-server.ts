@@ -64,6 +64,7 @@ function recordCorrect(id: string, userId: number) {
   if (!b || b.status !== "active") return null;
   const p = b.players.find(p => p.userId === userId);
   if (!p || p.status !== "playing") return null;
+  p.attempts += 1;
   p.correctAt = Date.now();
   p.status = "done";
   if (b.players.every(p => p.status === "done")) b.status = "finished";
